@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use crate::adapters::Entity;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Contact {
     pub id: String,
     pub name: String,
