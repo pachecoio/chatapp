@@ -1,6 +1,6 @@
-use std::fmt::Debug;
 use crate::adapters::ChannelRepository;
 use crate::models::Channel;
+use std::fmt::Debug;
 
 pub trait Entity: Clone + Debug {
     fn id(&self) -> &str;
@@ -61,7 +61,6 @@ impl<E: Entity> Repository<E> for InMemoryRepository<E> {
         Ok(self.entities.clone())
     }
 }
-
 
 /// Creates an in-memory repository with base methods implemented
 #[cfg(test)]

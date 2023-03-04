@@ -26,9 +26,7 @@ impl ChannelService {
         let channel = Channel::new(&cmd.name, cmd.channel_type.clone(), &cmd.contact_ids);
         match self.repository.create(&channel) {
             Ok(c) => Ok(c),
-            Err(e) => Err(ChannelError {
-                message: e,
-            }),
+            Err(e) => Err(ChannelError { message: e }),
         }
     }
 }

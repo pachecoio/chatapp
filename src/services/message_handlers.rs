@@ -1,8 +1,8 @@
+use crate::adapters::{ChannelRepository, Repository};
 use crate::commands;
 use crate::commands::SendMessage;
-use std::fmt::{Display, Formatter};
-use crate::adapters::{ChannelRepository, Repository};
 use crate::models::{Channel, ChannelType, Contact, Message};
+use std::fmt::{Display, Formatter};
 
 pub struct MessageService {
     repository: Box<dyn Repository<Message>>,
@@ -11,7 +11,11 @@ pub struct MessageService {
 }
 
 impl MessageService {
-    pub fn new<R: Repository<Message> + 'static, C: ChannelRepository + 'static, CO: Repository<Contact> + 'static>(
+    pub fn new<
+        R: Repository<Message> + 'static,
+        C: ChannelRepository + 'static,
+        CO: Repository<Contact> + 'static,
+    >(
         repository: R,
         channel_repository: C,
         contact_repository: CO,
@@ -27,12 +31,16 @@ impl MessageService {
         let contact_from = self.get_contact(&cmd.from)?;
         let contact_to = self.get_contact(&cmd.to)?;
         let channel = match &cmd.channel_id {
-            None => self.create_private_channel(
-                &vec![contact_from.id.clone(), contact_to.id.clone()],
-            )?,
+            None => {
+                self.create_private_channel(&vec![contact_from.id.clone(), contact_to.id.clone()])?
+            }
             Some(c) => self.get_channel(c)?,
         };
-        Ok(())
+        let message = Message::new(&channel.id, &cmd.from, &cmd.to, &cmd.content);
+        match self.repository.create(&message) {
+            Ok(_) => Ok(()),
+            Err(e) => Err(MessageError { message: e }),
+        }
     }
 
     fn get_contact(&mut self, id: &String) -> Result<Contact, MessageError> {
@@ -53,16 +61,17 @@ impl MessageService {
         }
     }
 
-    fn create_private_channel(&mut self, contact_ids: &Vec<String>) -> Result<Channel, MessageError> {
+    fn create_private_channel(
+        &mut self,
+        contact_ids: &Vec<String>,
+    ) -> Result<Channel, MessageError> {
         match self.channel_repository.get_by_contact_ids(contact_ids) {
             Some(c) => Ok(c),
             None => {
                 let channel = Channel::new("", ChannelType::Private, contact_ids);
                 match self.channel_repository.create(&channel) {
                     Ok(c) => Ok(c),
-                    Err(e) => Err(MessageError {
-                        message: e,
-                    }),
+                    Err(e) => Err(MessageError { message: e }),
                 }
             }
         }
@@ -81,13 +90,15 @@ impl Display for MessageError {
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{Entity, mock_channel_repo, mock_repo};
-    use crate::models::{ChannelType, Contact};
     use super::*;
+    use crate::adapters::{mock_channel_repo, mock_repo, Entity};
+    use crate::models::{ChannelType, Contact};
 
     fn add_contacts(repo: &mut Box<dyn Repository<Contact>>) -> Vec<Contact> {
-        repo.create(&Contact::new("Jon Snow", "jon@winterfell.com")).unwrap();
-        repo.create(&Contact::new("Arya Stark", "arya@winterfell.com")).unwrap();
+        repo.create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+            .unwrap();
+        repo.create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+            .unwrap();
         repo.list().unwrap().clone()
     }
 
@@ -97,16 +108,17 @@ mod tests {
             channel_type: ChannelType::Private,
             contact_ids: vec![contacts[0].id.clone(), contacts[1].id.clone()],
         };
-        repo.create(&Channel::new(&cmd.name, cmd.channel_type.clone(), &cmd.contact_ids)).unwrap()
+        repo.create(&Channel::new(
+            &cmd.name,
+            cmd.channel_type.clone(),
+            &cmd.contact_ids,
+        ))
+        .unwrap()
     }
 
     #[actix_web::test]
     async fn can_send_message() {
-        let mut service = MessageService::new(
-            mock_repo(),
-            mock_channel_repo(),
-            mock_repo(),
-        );
+        let mut service = MessageService::new(mock_repo(), mock_channel_repo(), mock_repo());
         let contacts = add_contacts(&mut service.contact_repository);
         let channel = add_channel(&mut service.channel_repository, &contacts);
 
@@ -121,5 +133,12 @@ mod tests {
         let channels = service.channel_repository.list().unwrap();
         assert_eq!(channels.len(), 1, "Should not have created a new channel");
         assert!(res.is_ok());
+
+        let messages = service.repository.list().unwrap();
+        assert_eq!(messages.len(), 1, "Should have created a new message");
+        let message = messages.first().unwrap();
+        assert_eq!(message.from, cmd.from);
+        assert_eq!(message.to, cmd.to);
+        assert_eq!(message.content, cmd.content);
     }
 }

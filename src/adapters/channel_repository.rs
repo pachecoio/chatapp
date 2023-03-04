@@ -20,7 +20,5 @@ impl ChannelRepository for InMemoryRepository<Channel> {
 
 #[cfg(test)]
 pub fn mock_channel_repo() -> InMemoryRepository<Channel> {
-    InMemoryRepository {
-        entities: vec![],
-    }
+    InMemoryRepository { entities: vec![] }
 }

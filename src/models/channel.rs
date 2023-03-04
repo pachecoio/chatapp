@@ -1,6 +1,6 @@
 use crate::adapters::Entity;
-use std::fmt::{Debug, Formatter};
 use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Formatter};
 use uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

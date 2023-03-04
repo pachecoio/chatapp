@@ -1,9 +1,7 @@
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::ser::{
-    SerializeStruct,
-};
 use crate::adapters::Entity;
+use chrono::{DateTime, Utc};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Debug, Clone)]
 pub struct Message {
@@ -25,12 +23,7 @@ impl Entity for Message {
 }
 
 impl Message {
-    pub fn new(
-        channel_id: &str,
-        from: &str,
-        to: &str,
-        content: &str,
-    ) -> Self {
+    pub fn new(channel_id: &str, from: &str, to: &str, content: &str) -> Self {
         Message {
             id: uuid::Uuid::new_v4().to_string(),
             channel_id: channel_id.to_string(),
@@ -44,7 +37,10 @@ impl Message {
 }
 
 impl Serialize for Message {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         let mut state = serializer.serialize_struct("Message", 7)?;
         state.serialize_field("id", &self.id)?;
         state.serialize_field("channel_id", &self.channel_id)?;
@@ -58,7 +54,10 @@ impl Serialize for Message {
 }
 
 impl<'de> Deserialize<'de> for Message {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         #[derive(Deserialize)]
         struct MessageData {
             id: String,
@@ -77,8 +76,14 @@ impl<'de> Deserialize<'de> for Message {
             from: data.from,
             to: data.to,
             content: data.content,
-            created_at: DateTime::<Utc>::from_utc(chrono::NaiveDateTime::from_timestamp(data.created_at, 0), Utc),
-            updated_at: DateTime::<Utc>::from_utc(chrono::NaiveDateTime::from_timestamp(data.updated_at, 0), Utc),
+            created_at: DateTime::<Utc>::from_utc(
+                chrono::NaiveDateTime::from_timestamp(data.created_at, 0),
+                Utc,
+            ),
+            updated_at: DateTime::<Utc>::from_utc(
+                chrono::NaiveDateTime::from_timestamp(data.updated_at, 0),
+                Utc,
+            ),
         })
     }
 }
