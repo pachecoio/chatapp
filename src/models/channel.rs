@@ -1,8 +1,9 @@
 use crate::adapters::Entity;
 use std::fmt::{Debug, Formatter};
+use serde::{Deserialize, Serialize};
 use uuid;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Channel {
     pub id: String,
     pub name: Option<String>,
@@ -27,7 +28,7 @@ impl Channel {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum ChannelType {
     Private,
     Group,

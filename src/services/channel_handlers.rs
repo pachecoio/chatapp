@@ -86,7 +86,7 @@ mod tests {
         let (contact_repo, contacts) = mock_repo_with_contacts::<Contact>().await;
         let mut service = ChannelService::new(mock_repo(), contact_repo);
         let cmd = commands::CreateChannel {
-            name: "Test channel".to_string(),
+            name: "Private channel".to_string(),
             channel_type: ChannelType::Private,
             contact_ids: contacts.iter().map(|c| c.id.clone()).collect(),
         };
@@ -100,7 +100,7 @@ mod tests {
     async fn cannot_create_private_channel_with_less_than_two_contacts() {
         let mut service = ChannelService::new(mock_repo(), mock_repo());
         let cmd = commands::CreateChannel {
-            name: "Test channel".to_string(),
+            name: "Private channel without contacts".to_string(),
             channel_type: ChannelType::Private,
             contact_ids: vec![],
         };
@@ -115,7 +115,7 @@ mod tests {
         let (contact_repo, contacts) = mock_repo_with_contacts::<Contact>().await;
         let mut service = ChannelService::new(mock_repo(), contact_repo);
         let cmd = commands::CreateChannel {
-            name: "Test channel".to_string(),
+            name: "Group channel".to_string(),
             channel_type: ChannelType::Group,
             contact_ids: contacts.iter().map(|c| c.id.clone()).collect(),
         };
