@@ -12,12 +12,13 @@ pub trait Repository<E: Entity> {
     fn list(&self) -> Result<Vec<E>, String>;
 }
 
+/// Creates an in-memory repository with base methods implemented
 #[cfg(test)]
 pub fn mock_repo<E: Entity>() -> impl Repository<E> {
-    struct MockRepo<E> {
+    struct InMemoryRepository<E> {
         entities: Vec<E>,
     }
-    impl<E: Entity> Repository<E> for MockRepo<E> {
+    impl<E: Entity> Repository<E> for InMemoryRepository<E> {
         fn create(&mut self, entity: &E) -> Result<E, String> {
             self.entities.push(entity.clone());
             Ok(entity.clone())
@@ -59,5 +60,5 @@ pub fn mock_repo<E: Entity>() -> impl Repository<E> {
             Ok(self.entities.clone())
         }
     }
-    MockRepo { entities: vec![] }
+    InMemoryRepository { entities: vec![] }
 }

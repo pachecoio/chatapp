@@ -69,6 +69,7 @@ mod tests {
     use crate::models::{Channel, Contact};
     use crate::services::channel_handlers::ChannelService;
 
+    /// Creates a mock repository with two contacts
     async fn mock_repo_with_contacts<E: Entity>() -> (impl Repository<Contact>, Vec<Contact>) {
         let mut contact_repo = mock_repo();
         let jon = contact_repo
