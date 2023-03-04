@@ -92,7 +92,7 @@ impl Display for MessageError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::adapters::{mock_channel_repo, mock_repo, Entity, mock_contact_repo};
+    use crate::adapters::{mock_channel_repo, mock_contact_repo, mock_repo, Entity};
     use crate::models::{ChannelType, Contact};
 
     fn add_contacts(repo: &mut Box<dyn Repository<Contact>>) -> Vec<Contact> {
@@ -119,7 +119,8 @@ mod tests {
 
     #[actix_web::test]
     async fn can_send_message() {
-        let mut service = MessageService::new(mock_repo(), mock_channel_repo(), mock_contact_repo());
+        let mut service =
+            MessageService::new(mock_repo(), mock_channel_repo(), mock_contact_repo());
         let contacts = add_contacts(&mut service.contact_repository);
         let channel = add_channel(&mut service.channel_repository, &contacts);
 
