@@ -20,4 +20,5 @@ pub struct UpdateContact {
 pub struct CreateChannel {
     pub name: String,
     pub channel_type: ChannelType,
+    pub contact_ids: Vec<String>,
 }
