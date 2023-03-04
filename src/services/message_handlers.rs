@@ -1,4 +1,4 @@
-use crate::adapters::{ChannelRepository, Repository};
+use crate::adapters::{ChannelRepository, ContactRepository, Repository};
 use crate::commands;
 use crate::commands::SendMessage;
 use crate::models::{Channel, ChannelType, Contact, Message};
@@ -14,7 +14,7 @@ impl MessageService {
     pub fn new<
         R: Repository<Message> + 'static,
         C: ChannelRepository + 'static,
-        CO: Repository<Contact> + 'static,
+        CO: ContactRepository + 'static,
     >(
         repository: R,
         channel_repository: C,
@@ -78,6 +78,7 @@ impl MessageService {
     }
 }
 
+#[derive(Debug)]
 pub struct MessageError {
     pub message: String,
 }
@@ -91,7 +92,7 @@ impl Display for MessageError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::adapters::{mock_channel_repo, mock_repo, Entity};
+    use crate::adapters::{mock_channel_repo, mock_repo, Entity, mock_contact_repo};
     use crate::models::{ChannelType, Contact};
 
     fn add_contacts(repo: &mut Box<dyn Repository<Contact>>) -> Vec<Contact> {
@@ -118,7 +119,7 @@ mod tests {
 
     #[actix_web::test]
     async fn can_send_message() {
-        let mut service = MessageService::new(mock_repo(), mock_channel_repo(), mock_repo());
+        let mut service = MessageService::new(mock_repo(), mock_channel_repo(), mock_contact_repo());
         let contacts = add_contacts(&mut service.contact_repository);
         let channel = add_channel(&mut service.channel_repository, &contacts);
 
