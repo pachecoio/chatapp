@@ -1,6 +1,6 @@
 use actix::{Actor, StreamHandler};
-use actix_web::{HttpRequest, HttpResponse, web};
 use actix_web::http::Error;
+use actix_web::{web, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 
 struct WebSocket;
@@ -21,7 +21,10 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WebSocket {
     }
 }
 
-pub async fn index(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, actix_web::Error> {
+pub async fn index(
+    req: HttpRequest,
+    stream: web::Payload,
+) -> Result<HttpResponse, actix_web::Error> {
     let resp = ws::start(WebSocket {}, &req, stream);
     println!("{:?}", resp);
     resp

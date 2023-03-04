@@ -1,5 +1,5 @@
-pub mod contact;
 pub mod channel;
+pub mod contact;
 
-pub use contact::Contact;
 pub use channel::Channel;
+pub use contact::Contact;

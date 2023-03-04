@@ -25,14 +25,22 @@ pub fn mock_repo<E: Entity>() -> impl Repository<E> {
 
         fn update(&mut self, entity: &E) -> Result<(), String> {
             let contact = self.get(entity.id()).ok_or("Entity not found")?;
-            let index = self.entities.iter().position(|c| c.id() == contact.id()).unwrap();
+            let index = self
+                .entities
+                .iter()
+                .position(|c| c.id() == contact.id())
+                .unwrap();
             self.entities[index] = entity.clone();
             Ok(())
         }
 
         fn delete(&mut self, id: &str) -> Result<(), String> {
             let contact = self.get(id).ok_or("Entity not found")?;
-            let index = self.entities.iter().position(|c| c.id() == contact.id()).unwrap();
+            let index = self
+                .entities
+                .iter()
+                .position(|c| c.id() == contact.id())
+                .unwrap();
             self.entities.remove(index);
             Ok(())
         }

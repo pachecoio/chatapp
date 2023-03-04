@@ -1,10 +1,10 @@
-mod websocket;
+mod adapters;
+pub mod commands;
 mod models;
 mod services;
-pub mod commands;
-mod adapters;
+mod websocket;
 
-use actix_web::{App, HttpServer, web};
+use actix_web::{web, App, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

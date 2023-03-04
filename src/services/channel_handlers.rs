@@ -1,35 +1,35 @@
 use crate::adapters::Repository;
 use crate::commands;
-use crate::models::{Channel, Contact};
 use crate::models::channel::ChannelType;
+use crate::models::{Channel, Contact};
 
 pub struct ChannelService {
     repository: Box<dyn Repository<Channel>>,
-    contact_repository: Box<dyn Repository<Contact>>
+    contact_repository: Box<dyn Repository<Contact>>,
 }
 
 impl ChannelService {
-    pub fn new<R: Repository<Channel> + 'static, C: Repository<Contact> + 'static>(repository: R, contact_repository: C) -> Self {
+    pub fn new<R: Repository<Channel> + 'static, C: Repository<Contact> + 'static>(
+        repository: R,
+        contact_repository: C,
+    ) -> Self {
         ChannelService {
             repository: Box::new(repository),
-            contact_repository: Box::new(contact_repository)
+            contact_repository: Box::new(contact_repository),
         }
     }
 
-    pub async fn create_channel(&mut self, cmd: &commands::CreateChannel) -> Result<Channel, ChannelError> {
+    pub async fn create_channel(
+        &mut self,
+        cmd: &commands::CreateChannel,
+    ) -> Result<Channel, ChannelError> {
         validate_channel(cmd)?;
-        let channel = Channel::new(
-            &cmd.name,
-            cmd.channel_type.clone(),
-            &cmd.contact_ids
-        );
+        let channel = Channel::new(&cmd.name, cmd.channel_type.clone(), &cmd.contact_ids);
         match self.repository.create(&channel) {
             Ok(c) => Ok(c),
-            Err(e) => {
-                Err(ChannelError {
-                    message: e.to_string()
-                })
-            }
+            Err(e) => Err(ChannelError {
+                message: e,
+            }),
         }
     }
 }
@@ -48,13 +48,13 @@ impl std::fmt::Display for ChannelError {
 fn validate_channel(cmd: &commands::CreateChannel) -> Result<(), ChannelError> {
     match cmd.channel_type {
         ChannelType::Private => validate_private_channel(cmd),
-        _ => Ok(())
+        _ => Ok(()),
     }
 }
 fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), ChannelError> {
     if cmd.contact_ids.len() != 2 {
         Err(ChannelError {
-            message: "Private channels must have exactly 2 contacts".to_string()
+            message: "Private channels must have exactly 2 contacts".to_string(),
         })
     } else {
         Ok(())
@@ -63,32 +63,27 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{Entity, mock_repo, Repository};
+    use crate::adapters::{mock_repo, Entity, Repository};
     use crate::commands;
-    use crate::models::{Channel, Contact};
     use crate::models::channel::ChannelType;
-    use crate::services::channel_handlers::{ChannelService};
+    use crate::models::{Channel, Contact};
+    use crate::services::channel_handlers::ChannelService;
 
     async fn mock_repo_with_contacts<E: Entity>() -> (impl Repository<Contact>, Vec<Contact>) {
         let mut contact_repo = mock_repo();
-        let jon = contact_repo.create(&Contact::new(
-            "Jon Snow",
-            "jon@winterfell.com"
-        )).unwrap();
-        let arya = contact_repo.create(&Contact::new(
-            "Arya Stark",
-            "arya@winterfell.com"
-        )).unwrap();
+        let jon = contact_repo
+            .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+            .unwrap();
+        let arya = contact_repo
+            .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+            .unwrap();
         (contact_repo, vec![jon, arya])
     }
 
     #[actix_web::test]
     async fn create_private_channel() {
         let (contact_repo, contacts) = mock_repo_with_contacts::<Contact>().await;
-        let mut service = ChannelService::new(
-            mock_repo(),
-            contact_repo
-        );
+        let mut service = ChannelService::new(mock_repo(), contact_repo);
         let cmd = commands::CreateChannel {
             name: "Test channel".to_string(),
             channel_type: ChannelType::Private,
@@ -102,10 +97,7 @@ mod tests {
 
     #[actix_web::test]
     async fn cannot_create_private_channel_with_less_than_two_contacts() {
-        let mut service = ChannelService::new(
-            mock_repo(),
-            mock_repo()
-        );
+        let mut service = ChannelService::new(mock_repo(), mock_repo());
         let cmd = commands::CreateChannel {
             name: "Test channel".to_string(),
             channel_type: ChannelType::Private,
@@ -120,10 +112,7 @@ mod tests {
     #[actix_web::test]
     async fn create_group_channel() {
         let (contact_repo, contacts) = mock_repo_with_contacts::<Contact>().await;
-        let mut service = ChannelService::new(
-            mock_repo(),
-            contact_repo
-        );
+        let mut service = ChannelService::new(mock_repo(), contact_repo);
         let cmd = commands::CreateChannel {
             name: "Test channel".to_string(),
             channel_type: ChannelType::Group,
@@ -133,5 +122,6 @@ mod tests {
         assert!(res.is_ok());
         let channel = res.unwrap();
         assert_eq!(channel.contact_ids.len(), 2);
+        assert_eq!(channel.channel_type, ChannelType::Group);
     }
 }

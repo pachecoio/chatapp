@@ -1,12 +1,14 @@
-use std::fmt::{Display, Formatter};
 use crate::commands;
 use crate::commands::SendMessage;
+use std::fmt::{Display, Formatter};
 
 pub fn send_message(cmd: &SendMessage) -> Result<(), MessageError> {
-    println!("Sending message to channel: {}, contact: {}, message: {}", cmd.channel_id, cmd.contact_id, cmd.message);
+    println!(
+        "Sending message to channel: {}, contact: {}, message: {}",
+        cmd.channel_id, cmd.contact_id, cmd.message
+    );
     Ok(())
 }
-
 
 pub struct MessageError {
     pub message: String,

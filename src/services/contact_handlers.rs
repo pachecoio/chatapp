@@ -2,7 +2,10 @@ use crate::adapters::Repository;
 use crate::commands;
 use crate::models::Contact;
 
-pub async fn create_contact<R: Repository<Contact>>(repo: &mut R, cmd: &commands::CreateContact) -> Result<Contact, String> {
+pub async fn create_contact<R: Repository<Contact>>(
+    repo: &mut R,
+    cmd: &commands::CreateContact,
+) -> Result<Contact, String> {
     let contact = Contact {
         id: uuid::Uuid::new_v4().to_string(),
         name: cmd.name.clone(),
@@ -13,7 +16,10 @@ pub async fn create_contact<R: Repository<Contact>>(repo: &mut R, cmd: &commands
     Ok(contact)
 }
 
-pub async fn update_contact<R: Repository<Contact>>(repo: &mut R, cmd: &commands::UpdateContact) -> Result<Contact, String> {
+pub async fn update_contact<R: Repository<Contact>>(
+    repo: &mut R,
+    cmd: &commands::UpdateContact,
+) -> Result<Contact, String> {
     let mut contact = repo.get(&cmd.id).ok_or("Contact not found")?;
     if let Some(name) = &cmd.name {
         contact.name = name.clone();
@@ -27,10 +33,10 @@ pub async fn update_contact<R: Repository<Contact>>(repo: &mut R, cmd: &commands
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{Entity, mock_repo};
+    use crate::adapters::{mock_repo, Entity};
     use crate::commands;
     use crate::models::Contact;
-    use crate::services::contact_handlers::{create_contact, Repository, update_contact};
+    use crate::services::contact_handlers::{create_contact, update_contact, Repository};
 
     async fn _create_contact<R: Repository<Contact>>(repo: &mut R) -> Result<Contact, String> {
         let cmd = commands::CreateContact {
@@ -62,14 +68,13 @@ mod tests {
         let cmd = commands::UpdateContact {
             id: id.clone(),
             name: Some("Arya Stark".to_string()),
-            email: None
+            email: None,
         };
         let res = update_contact(&mut repo, &cmd).await;
         assert!(res.is_ok());
 
         let contact = repo.get(&id).unwrap();
         assert_eq!(contact.name, "Arya Stark");
-
     }
 
     #[actix_web::test]

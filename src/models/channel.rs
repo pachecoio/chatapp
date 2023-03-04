@@ -1,6 +1,6 @@
+use crate::adapters::Entity;
 use std::fmt::{Debug, Formatter};
 use uuid;
-use crate::adapters::Entity;
 
 #[derive(Clone, Debug)]
 pub struct Channel {
@@ -22,7 +22,7 @@ impl Channel {
             id: uuid::Uuid::new_v4().to_string(),
             name: Some(name.to_string()),
             channel_type,
-            contact_ids: contact_ids.clone()
+            contact_ids: contact_ids.to_owned(),
         }
     }
 }
@@ -30,5 +30,5 @@ impl Channel {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ChannelType {
     Private,
-    Group
+    Group,
 }
