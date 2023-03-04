@@ -1,7 +1,6 @@
 use crate::adapters::Repository;
 use crate::commands;
-use crate::models::channel::ChannelType;
-use crate::models::{Channel, Contact};
+use crate::models::{Channel, ChannelType, Contact};
 
 pub struct ChannelService {
     repository: Box<dyn Repository<Channel>>,
@@ -65,8 +64,7 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 mod tests {
     use crate::adapters::{mock_repo, Entity, Repository};
     use crate::commands;
-    use crate::models::channel::ChannelType;
-    use crate::models::{Channel, Contact};
+    use crate::models::{Channel, ChannelType, Contact};
     use crate::services::channel_handlers::ChannelService;
 
     /// Creates a mock repository with two contacts

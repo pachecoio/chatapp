@@ -1,9 +1,10 @@
-use crate::models::channel::ChannelType;
+use crate::models::ChannelType;
 
 pub struct SendMessage {
-    pub channel_id: String,
-    pub contact_id: String,
-    pub message: String,
+    pub channel_id: Option<String>,
+    pub from: String,
+    pub to: String,
+    pub content: String,
 }
 
 pub struct CreateContact {
