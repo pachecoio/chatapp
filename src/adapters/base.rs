@@ -14,9 +14,35 @@ pub trait Repository<E: Entity> {
     fn list(&self) -> Result<Vec<E>, String>;
 }
 
+pub struct MongoRepository<'a> {
+    pub db: &'a mongodb::Database,
+}
+
+impl<E: Entity> Repository<E> for MongoRepository<'_> {
+    fn create(&mut self, entity: &E) -> Result<E, String> {
+        todo!()
+    }
+
+    fn update(&mut self, entity: &E) -> Result<(), String> {
+        todo!()
+    }
+
+    fn delete(&mut self, id: &str) -> Result<(), String> {
+        todo!()
+    }
+
+    fn get(&self, id: &str) -> Option<E> {
+        todo!()
+    }
+
+    fn list(&self) -> Result<Vec<E>, String> {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 pub struct InMemoryRepository<E> {
-    pub(crate) entities: Vec<E>,
+    pub entities: Vec<E>,
 }
 
 #[cfg(test)]

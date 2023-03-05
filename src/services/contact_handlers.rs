@@ -2,33 +2,50 @@ use crate::adapters::Repository;
 use crate::commands;
 use crate::models::Contact;
 
-pub async fn create_contact<R: Repository<Contact>>(
-    repo: &mut R,
-    cmd: &commands::CreateContact,
-) -> Result<Contact, String> {
-    let contact = Contact {
-        id: uuid::Uuid::new_v4().to_string(),
-        name: cmd.name.clone(),
-        email: cmd.email.clone(),
-    };
-    repo.create(&contact)?;
 
-    Ok(contact)
+pub struct ContactService {
+    repository: Box<dyn Repository<Contact>>,
 }
 
-pub async fn update_contact<R: Repository<Contact>>(
-    repo: &mut R,
-    cmd: &commands::UpdateContact,
-) -> Result<Contact, String> {
-    let mut contact = repo.get(&cmd.id).ok_or("Contact not found")?;
-    if let Some(name) = &cmd.name {
-        contact.name = name.clone();
+impl ContactService {
+    pub fn new<R: Repository<Contact> + 'static>(repository: R) -> Self {
+        ContactService {
+            repository: Box::new(repository),
+        }
     }
-    if let Some(email) = &cmd.email {
-        contact.email = email.clone();
+
+    pub async fn list(&self) -> Vec<Contact> {
+        self.repository.list().unwrap()
     }
-    repo.update(&contact)?;
-    Ok(contact)
+
+    pub async fn create_contact(
+        &mut self,
+        cmd: &commands::CreateContact,
+    ) -> Result<Contact, String> {
+        let contact = Contact {
+            id: uuid::Uuid::new_v4().to_string(),
+            name: cmd.name.clone(),
+            email: cmd.email.clone(),
+        };
+        self.repository.create(&contact)?;
+
+        Ok(contact)
+    }
+
+    pub async fn update_contact(
+        &mut self,
+        cmd: &commands::UpdateContact,
+    ) -> Result<Contact, String> {
+        let mut contact = self.repository.get(&cmd.id).ok_or("Contact not found")?;
+        if let Some(name) = &cmd.name {
+            contact.name = name.clone();
+        }
+        if let Some(email) = &cmd.email {
+            contact.email = email.clone();
+        }
+        self.repository.update(&contact)?;
+        Ok(contact)
+    }
 }
 
 #[cfg(test)]
@@ -36,32 +53,32 @@ mod tests {
     use crate::adapters::{mock_repo, Entity};
     use crate::commands;
     use crate::models::Contact;
-    use crate::services::contact_handlers::{create_contact, update_contact, Repository};
+    use crate::services::contact_handlers::{Repository, ContactService};
 
-    async fn _create_contact<R: Repository<Contact>>(repo: &mut R) -> Result<Contact, String> {
+    async fn _create_contact(service: &mut ContactService) -> Result<Contact, String> {
         let cmd = commands::CreateContact {
             name: "Jon Snow".to_string(),
             email: "jon@winterfell.com".to_string(),
         };
-        create_contact(repo, &cmd).await
+        service.create_contact(&cmd).await
     }
 
     #[actix_web::test]
     async fn can_create_contact() {
-        let mut repo = mock_repo();
-        let res = _create_contact(&mut repo).await;
-        let contacts = repo.list().unwrap();
+        let mut service = ContactService::new(mock_repo());
+        let res = _create_contact(&mut service).await;
+        let contacts = service.repository.list().unwrap();
         assert_eq!(contacts.len(), 1);
     }
 
     #[actix_web::test]
     async fn can_update_contact() {
-        let mut repo = mock_repo();
-        let res = _create_contact(&mut repo).await;
-        let contacts = repo.list().unwrap();
+        let mut service = ContactService::new(mock_repo());
+        let res = _create_contact(&mut service).await;
+        let contacts = service.repository.list().unwrap();
         let id = contacts.first().unwrap().id.clone();
 
-        let contact = repo.get(&id);
+        let contact = service.repository.get(&id);
         assert!(contact.is_some());
         let contact = contact.unwrap();
 
@@ -70,23 +87,23 @@ mod tests {
             name: Some("Arya Stark".to_string()),
             email: None,
         };
-        let res = update_contact(&mut repo, &cmd).await;
+        let res = service.update_contact(&cmd).await;
         assert!(res.is_ok());
 
-        let contact = repo.get(&id).unwrap();
+        let contact = service.repository.get(&id).unwrap();
         assert_eq!(contact.name, "Arya Stark");
     }
 
     #[actix_web::test]
     async fn can_delete_contact() {
-        let mut repo = mock_repo();
-        let res = _create_contact(&mut repo).await;
-        let contacts = repo.list().unwrap();
+        let mut service = ContactService::new(mock_repo());
+        let res = _create_contact(&mut service).await;
+        let contacts = service.repository.list().unwrap();
         let id = contacts.first().unwrap().id.clone();
 
-        let res = repo.delete(&id);
+        let res = service.repository.delete(&id);
         assert!(res.is_ok());
-        let contacts = repo.list().unwrap();
+        let contacts = service.repository.list().unwrap();
         assert_eq!(contacts.len(), 0);
     }
 }

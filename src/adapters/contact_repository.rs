@@ -1,6 +1,7 @@
-use crate::adapters::base::InMemoryRepository;
 use crate::adapters::Repository;
 use crate::models::Contact;
+#[cfg(test)]
+use crate::adapters::base::InMemoryRepository;
 
 pub trait ContactRepository: Repository<Contact> {}
 
