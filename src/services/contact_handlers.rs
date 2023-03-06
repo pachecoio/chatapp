@@ -1,27 +1,21 @@
-use crate::adapters::Repository;
+use crate::adapters::{ContactRepository, Repository};
 use crate::commands;
 use crate::models::Contact;
 
-
-pub struct ContactService {
-    repository: Box<dyn Repository<Contact>>,
+pub struct ContactService<'a> {
+    repository: &'a mut dyn ContactRepository,
 }
 
-impl ContactService {
-    pub fn new<R: Repository<Contact> + 'static>(repository: R) -> Self {
-        ContactService {
-            repository: Box::new(repository),
-        }
+impl<'a> ContactService<'a> {
+    fn new(repo: &'a mut dyn ContactRepository) -> Self {
+        ContactService { repository: repo }
     }
 
-    pub async fn list(&self) -> Vec<Contact> {
-        self.repository.list().unwrap()
+    async fn list(&self) -> Result<Vec<Contact>, String> {
+        self.repository.list()
     }
 
-    pub async fn create_contact(
-        &mut self,
-        cmd: &commands::CreateContact,
-    ) -> Result<Contact, String> {
+    async fn create_contact(&mut self, cmd: &commands::CreateContact) -> Result<Contact, String> {
         let contact = Contact {
             id: uuid::Uuid::new_v4().to_string(),
             name: cmd.name.clone(),
@@ -32,10 +26,7 @@ impl ContactService {
         Ok(contact)
     }
 
-    pub async fn update_contact(
-        &mut self,
-        cmd: &commands::UpdateContact,
-    ) -> Result<Contact, String> {
+    async fn update_contact(&mut self, cmd: &commands::UpdateContact) -> Result<Contact, String> {
         let mut contact = self.repository.get(&cmd.id).ok_or("Contact not found")?;
         if let Some(name) = &cmd.name {
             contact.name = name.clone();
@@ -50,12 +41,12 @@ impl ContactService {
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_repo, Entity};
+    use crate::adapters::{mock_repo, Entity, mock_contact_repo};
     use crate::commands;
     use crate::models::Contact;
     use crate::services::contact_handlers::{Repository, ContactService};
 
-    async fn _create_contact(service: &mut ContactService) -> Result<Contact, String> {
+    async fn _create_contact(service: &mut ContactService<'_>) -> Result<Contact, String> {
         let cmd = commands::CreateContact {
             name: "Jon Snow".to_string(),
             email: "jon@winterfell.com".to_string(),
@@ -65,7 +56,8 @@ mod tests {
 
     #[actix_web::test]
     async fn can_create_contact() {
-        let mut service = ContactService::new(mock_repo());
+        let mut repo = mock_contact_repo();
+        let mut service = ContactService::new(&mut repo);
         let res = _create_contact(&mut service).await;
         let contacts = service.repository.list().unwrap();
         assert_eq!(contacts.len(), 1);
@@ -73,7 +65,8 @@ mod tests {
 
     #[actix_web::test]
     async fn can_update_contact() {
-        let mut service = ContactService::new(mock_repo());
+        let mut repo = mock_contact_repo();
+        let mut service = ContactService::new(&mut repo);
         let res = _create_contact(&mut service).await;
         let contacts = service.repository.list().unwrap();
         let id = contacts.first().unwrap().id.clone();
@@ -96,7 +89,8 @@ mod tests {
 
     #[actix_web::test]
     async fn can_delete_contact() {
-        let mut service = ContactService::new(mock_repo());
+        let mut repo = mock_contact_repo();
+        let mut service = ContactService::new(&mut repo);
         let res = _create_contact(&mut service).await;
         let contacts = service.repository.list().unwrap();
         let id = contacts.first().unwrap().id.clone();

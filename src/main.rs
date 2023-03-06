@@ -18,8 +18,8 @@ async fn main() -> std::io::Result<()> {
         .app_data(web::Data::new(AppState {
             db: db.to_owned(),
         }))
-        .route("/ws/", web::get().to(websocket::index)))
         .service(api::contacts::get_contacts)
+        .route("/ws/", web::get().to(websocket::index)))
         .bind(("127.0.0.1", 8080))?
         .run()
         .await

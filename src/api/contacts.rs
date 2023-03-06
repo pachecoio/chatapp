@@ -8,11 +8,12 @@ use crate::services::ContactService;
 pub async fn get_contacts(
     data: web::Data<AppState>,
 ) -> Result<HttpResponse, Error> {
-    let db = &data.db;
-    let repo = MongoRepository {
-        db: &db,
-    };
-    let service = ContactService::new(repo);
-    let contacts = service.list().await;
-    Ok(HttpResponse::Ok().json(contacts))
+    // let db = &data.db;
+    // let repo = MongoRepository {
+    //     db: &db,
+    // };
+    // let service = ContactService::new(repo);
+    // let contacts = service.list().await;
+    // Ok(HttpResponse::Ok().json(contacts))
+    todo!()
 }
