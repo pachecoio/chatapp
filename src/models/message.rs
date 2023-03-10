@@ -1,4 +1,4 @@
-use crate::adapters::Entity;
+use crate::adapters::Model;
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -16,7 +16,7 @@ pub struct Message {
     pub updated_at: DateTime<Utc>,
 }
 
-impl Entity for Message {
+impl Model for Message {
     fn id(&self) -> &str {
         &self.id
     }

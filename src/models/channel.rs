@@ -1,4 +1,4 @@
-use crate::adapters::Entity;
+use crate::adapters::Model;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 use uuid;
@@ -11,7 +11,7 @@ pub struct Channel {
     pub contact_ids: Vec<String>,
 }
 
-impl Entity for Channel {
+impl Model for Channel {
     fn id(&self) -> &str {
         &self.id
     }

@@ -3,7 +3,7 @@ mod channel_repository;
 mod contact_repository;
 pub mod database;
 
-pub use base::Entity;
+pub use base::Model;
 pub use base::Repository;
 
 #[cfg(test)]

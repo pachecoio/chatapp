@@ -41,7 +41,7 @@ impl<'a> ContactService<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_repo, Entity, mock_contact_repo};
+    use crate::adapters::{mock_repo, Model, mock_contact_repo};
     use crate::commands;
     use crate::models::Contact;
     use crate::services::contact_handlers::{Repository, ContactService};

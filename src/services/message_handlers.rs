@@ -92,7 +92,7 @@ impl Display for MessageError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::adapters::{mock_channel_repo, mock_contact_repo, mock_repo, Entity};
+    use crate::adapters::{mock_channel_repo, mock_contact_repo, mock_repo, Model};
     use crate::models::{ChannelType, Contact};
 
     fn add_contacts(repo: &mut Box<dyn Repository<Contact>>) -> Vec<Contact> {

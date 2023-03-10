@@ -60,13 +60,13 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_repo, Entity, Repository};
+    use crate::adapters::{mock_repo, Model, Repository};
     use crate::commands;
     use crate::models::{Channel, ChannelType, Contact};
     use crate::services::channel_handlers::ChannelService;
 
     /// Creates a mock repository with two contacts
-    async fn mock_repo_with_contacts<E: Entity>() -> (impl Repository<Contact>, Vec<Contact>) {
+    async fn mock_repo_with_contacts<E: Model>() -> (impl Repository<Contact>, Vec<Contact>) {
         let mut contact_repo = mock_repo();
         let jon = contact_repo
             .create(&Contact::new("Jon Snow", "jon@winterfell.com"))

@@ -1,4 +1,4 @@
-use crate::adapters::Entity;
+use crate::adapters::Model;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -8,7 +8,7 @@ pub struct Contact {
     pub email: String,
 }
 
-impl Entity for Contact {
+impl Model for Contact {
     fn id(&self) -> &str {
         &self.id
     }

@@ -2,28 +2,28 @@ use crate::adapters::ChannelRepository;
 use crate::models::Channel;
 use std::fmt::Debug;
 
-pub trait Entity: Clone + Debug {
+pub trait Model: Clone + Debug {
     fn id(&self) -> &str;
 }
 
-pub trait Repository<E: Entity> {
-    fn create(&mut self, entity: &E) -> Result<E, String>;
-    fn update(&mut self, entity: &E) -> Result<(), String>;
+pub trait Repository<M: Model> {
+    fn create(&mut self, entity: &M) -> Result<M, String>;
+    fn update(&mut self, entity: &M) -> Result<(), String>;
     fn delete(&mut self, id: &str) -> Result<(), String>;
-    fn get(&self, id: &str) -> Option<E>;
-    fn list(&self) -> Result<Vec<E>, String>;
+    fn get(&self, id: &str) -> Option<M>;
+    fn list(&self) -> Result<Vec<M>, String>;
 }
 
 pub struct MongoRepository<'a> {
     pub db: &'a mongodb::Database,
 }
 
-impl<E: Entity> Repository<E> for MongoRepository<'_> {
-    fn create(&mut self, entity: &E) -> Result<E, String> {
+impl<M: Model> Repository<M> for MongoRepository<'_> {
+    fn create(&mut self, entity: &M) -> Result<M, String> {
         todo!()
     }
 
-    fn update(&mut self, entity: &E) -> Result<(), String> {
+    fn update(&mut self, entity: &M) -> Result<(), String> {
         todo!()
     }
 
@@ -31,28 +31,28 @@ impl<E: Entity> Repository<E> for MongoRepository<'_> {
         todo!()
     }
 
-    fn get(&self, id: &str) -> Option<E> {
+    fn get(&self, id: &str) -> Option<M> {
         todo!()
     }
 
-    fn list(&self) -> Result<Vec<E>, String> {
+    fn list(&self) -> Result<Vec<M>, String> {
         todo!()
     }
 }
 
 #[cfg(test)]
-pub struct InMemoryRepository<E> {
-    pub entities: Vec<E>,
+pub struct InMemoryRepository<M> {
+    pub entities: Vec<M>,
 }
 
 #[cfg(test)]
-impl<E: Entity> Repository<E> for InMemoryRepository<E> {
-    fn create(&mut self, entity: &E) -> Result<E, String> {
+impl<M: Model> Repository<M> for InMemoryRepository<M> {
+    fn create(&mut self, entity: &M) -> Result<M, String> {
         self.entities.push(entity.clone());
         Ok(entity.clone())
     }
 
-    fn update(&mut self, entity: &E) -> Result<(), String> {
+    fn update(&mut self, entity: &M) -> Result<(), String> {
         let contact = self.get(entity.id()).ok_or("Entity not found")?;
         let index = self
             .entities
@@ -74,7 +74,7 @@ impl<E: Entity> Repository<E> for InMemoryRepository<E> {
         Ok(())
     }
 
-    fn get(&self, id: &str) -> Option<E> {
+    fn get(&self, id: &str) -> Option<M> {
         for entity in self.entities.iter() {
             let id = entity.id();
             if id == id {
@@ -83,13 +83,13 @@ impl<E: Entity> Repository<E> for InMemoryRepository<E> {
         }
         None
     }
-    fn list(&self) -> Result<Vec<E>, String> {
+    fn list(&self) -> Result<Vec<M>, String> {
         Ok(self.entities.clone())
     }
 }
 
 /// Creates an in-memory repository with base methods implemented
 #[cfg(test)]
-pub fn mock_repo<E: Entity>() -> impl Repository<E> {
+pub fn mock_repo<M: Model>() -> impl Repository<M> {
     InMemoryRepository { entities: vec![] }
 }
