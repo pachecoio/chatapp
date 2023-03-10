@@ -11,7 +11,7 @@ pub struct Channel {
     pub contact_ids: Vec<String>,
 }
 
-impl Model for Channel {
+impl Model<'_> for Channel {
     fn id(&self) -> &str {
         &self.id
     }

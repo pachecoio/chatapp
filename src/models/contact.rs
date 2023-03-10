@@ -8,7 +8,7 @@ pub struct Contact {
     pub email: String,
 }
 
-impl Model for Contact {
+impl Model<'_> for Contact {
     fn id(&self) -> &str {
         &self.id
     }
