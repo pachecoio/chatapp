@@ -1,41 +1,52 @@
 use crate::adapters::ChannelRepository;
 use crate::models::Channel;
 use std::fmt::Debug;
+use async_trait::async_trait;
 
-pub trait Model: Clone + Debug {
+pub trait Model: Clone + Debug + Send + Sync {
     fn id(&self) -> &str;
 }
 
+#[async_trait]
 pub trait Repository<M: Model> {
-    fn create(&mut self, entity: &M) -> Result<M, String>;
-    fn update(&mut self, entity: &M) -> Result<(), String>;
-    fn delete(&mut self, id: &str) -> Result<(), String>;
-    fn get(&self, id: &str) -> Option<M>;
-    fn list(&self) -> Result<Vec<M>, String>;
+    async fn create(&mut self, entity: &M) -> Result<M, String>;
+    async fn update(&mut self, entity: &M) -> Result<(), String>;
+    async fn delete(&mut self, id: &str) -> Result<(), String>;
+    async fn get(&self, id: &str) -> Option<M>;
+    async fn list(&self) -> Result<Vec<M>, String>;
 }
 
-pub struct MongoRepository<'a> {
-    pub db: &'a mongodb::Database,
+pub struct MongoRepository<M> {
+    pub collection: mongodb::Collection<M>,
 }
 
-impl<M: Model> Repository<M> for MongoRepository<'_> {
-    fn create(&mut self, entity: &M) -> Result<M, String> {
+impl<M: Model> MongoRepository<M> {
+    pub fn new(db: &mongodb::Database, collection_name: &str) -> Self {
+        MongoRepository {
+            collection: db.collection(collection_name)
+        }
+    }
+}
+
+#[async_trait]
+impl<M: Model> Repository<M> for MongoRepository<M> {
+    async fn create(&mut self, model: &M) -> Result<M, String> {
         todo!()
     }
 
-    fn update(&mut self, entity: &M) -> Result<(), String> {
+    async fn update(&mut self, model: &M) -> Result<(), String> {
         todo!()
     }
 
-    fn delete(&mut self, id: &str) -> Result<(), String> {
+    async fn delete(&mut self, id: &str) -> Result<(), String> {
         todo!()
     }
 
-    fn get(&self, id: &str) -> Option<M> {
+    async fn get(&self, id: &str) -> Option<M> {
         todo!()
     }
 
-    fn list(&self) -> Result<Vec<M>, String> {
+    async fn list(&self) -> Result<Vec<M>, String> {
         todo!()
     }
 }
@@ -46,14 +57,15 @@ pub struct InMemoryRepository<M> {
 }
 
 #[cfg(test)]
+#[async_trait]
 impl<M: Model> Repository<M> for InMemoryRepository<M> {
-    fn create(&mut self, entity: &M) -> Result<M, String> {
+    async fn create(&mut self, entity: &M) -> Result<M, String> {
         self.entities.push(entity.clone());
         Ok(entity.clone())
     }
 
-    fn update(&mut self, entity: &M) -> Result<(), String> {
-        let contact = self.get(entity.id()).ok_or("Entity not found")?;
+    async fn update(&mut self, entity: &M) -> Result<(), String> {
+        let contact = self.get(entity.id()).await.ok_or("Entity not found")?;
         let index = self
             .entities
             .iter()
@@ -63,8 +75,8 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         Ok(())
     }
 
-    fn delete(&mut self, id: &str) -> Result<(), String> {
-        let contact = self.get(id).ok_or("Entity not found")?;
+    async fn delete(&mut self, id: &str) -> Result<(), String> {
+        let contact = self.get(id).await.ok_or("Entity not found")?;
         let index = self
             .entities
             .iter()
@@ -74,7 +86,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         Ok(())
     }
 
-    fn get(&self, id: &str) -> Option<M> {
+    async fn get(&self, id: &str) -> Option<M> {
         for entity in self.entities.iter() {
             let id = entity.id();
             if id == id {
@@ -83,7 +95,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         }
         None
     }
-    fn list(&self) -> Result<Vec<M>, String> {
+    async fn list(&self) -> Result<Vec<M>, String> {
         Ok(self.entities.clone())
     }
 }

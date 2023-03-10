@@ -24,7 +24,7 @@ impl ChannelService {
     ) -> Result<Channel, ChannelError> {
         validate_channel(cmd)?;
         let channel = Channel::new(&cmd.name, cmd.channel_type.clone(), &cmd.contact_ids);
-        match self.repository.create(&channel) {
+        match self.repository.create(&channel).await {
             Ok(c) => Ok(c),
             Err(e) => Err(ChannelError { message: e }),
         }
@@ -70,9 +70,11 @@ mod tests {
         let mut contact_repo = mock_repo();
         let jon = contact_repo
             .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+            .await
             .unwrap();
         let arya = contact_repo
             .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+            .await
             .unwrap();
         (contact_repo, vec![jon, arya])
     }

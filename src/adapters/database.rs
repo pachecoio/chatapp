@@ -7,3 +7,16 @@ pub async fn init(db_name: &str) -> Database {
     let client = mongodb::Client::with_options(options).unwrap();
     client.database(db_name)
 }
+
+#[cfg(test)]
+mod tests {
+    use mongodb::Collection;
+    use crate::adapters::database::init;
+    use crate::models::Contact;
+
+    #[actix_web::test]
+    async fn test_init() {
+        let db = init("test").await;
+        assert_eq!(db.name(), "test");
+    }
+}
