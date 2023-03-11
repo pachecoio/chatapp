@@ -1,34 +1,34 @@
-use crate::adapters::Model;
+use crate::adapters::{IdType, Model};
 use chrono::{DateTime, Utc};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Debug, Clone)]
 pub struct Message {
-    pub id: String,
-    pub channel_id: String,
+    pub id: IdType,
+    pub channel_id: IdType,
     /// The id of the contact that sent the message
-    pub from: String,
+    pub from: IdType,
     /// The id of the contact that received the message
-    pub to: String,
+    pub to: IdType,
     pub content: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 impl Model for Message {
-    fn id(&self) -> &str {
+    fn id(&self) -> &IdType {
         &self.id
     }
 }
 
 impl Message {
-    pub fn new(channel_id: &str, from: &str, to: &str, content: &str) -> Self {
+    pub fn new(channel_id: &IdType, from: &IdType, to: &IdType, content: &str) -> Self {
         Message {
-            id: uuid::Uuid::new_v4().to_string(),
-            channel_id: channel_id.to_string(),
-            from: from.to_string(),
-            to: to.to_string(),
+            id: IdType::String(uuid::Uuid::new_v4().to_string()),
+            channel_id: channel_id.clone(),
+            from: from.clone(),
+            to: to.clone(),
             content: content.to_string(),
             created_at: Utc::now(),
             updated_at: Utc::now(),
@@ -60,10 +60,10 @@ impl<'de> Deserialize<'de> for Message {
     {
         #[derive(Deserialize)]
         struct MessageData {
-            id: String,
-            channel_id: String,
-            from: String,
-            to: String,
+            id: IdType,
+            channel_id: IdType,
+            from: IdType,
+            to: IdType,
             content: String,
             created_at: i64,
             updated_at: i64,

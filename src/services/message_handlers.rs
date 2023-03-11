@@ -1,4 +1,4 @@
-use crate::adapters::{Repository};
+use crate::adapters::{IdType, Repository};
 use crate::commands;
 
 use crate::models::{Channel, ChannelType, Contact, Message};
@@ -49,7 +49,7 @@ impl MessageService {
         }
     }
 
-    async fn get_contact(&mut self, id: &String) -> Result<Contact, MessageError> {
+    async fn get_contact(&mut self, id: &IdType) -> Result<Contact, MessageError> {
         match self.contact_repository.get(id).await {
             None => Err(MessageError {
                 message: format!("Contact with id {id} not found"),
@@ -58,7 +58,7 @@ impl MessageService {
         }
     }
 
-    async fn get_channel(&mut self, id: &String) -> Result<Channel, MessageError> {
+    async fn get_channel(&mut self, id: &IdType) -> Result<Channel, MessageError> {
         match self.channel_repository.get(id).await {
             None => Err(MessageError {
                 message: format!("Channel with id {id} not found"),
@@ -69,7 +69,7 @@ impl MessageService {
 
     async fn create_private_channel(
         &mut self,
-        contact_ids: &Vec<String>,
+        contact_ids: &Vec<IdType>,
     ) -> Result<Channel, MessageError> {
         match self.channel_repository.get_by_contact_ids(contact_ids) {
             Some(c) => Ok(c),

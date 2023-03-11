@@ -1,4 +1,4 @@
-use crate::adapters::{Model, Repository, RepositoryError};
+use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact};
 use async_trait::async_trait;
 use crate::adapters::channel_repository::ChannelRepository;
@@ -33,7 +33,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         Ok(())
     }
 
-    async fn delete(&mut self, id: &str) -> Result<(), RepositoryError> {
+    async fn delete(&mut self, id: &IdType) -> Result<(), RepositoryError> {
         let contact = match self.get(id).await {
             Some(c) => c,
             None => {
@@ -51,7 +51,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         Ok(())
     }
 
-    async fn get(&self, _id: &str) -> Option<M> {
+    async fn get(&self, _id: &IdType) -> Option<M> {
         for entity in self.entities.iter() {
             let id = entity.id();
             if id == id {
@@ -66,7 +66,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
 }
 
 impl ChannelRepository for InMemoryRepository<Channel> {
-    fn get_by_contact_ids(&self, contact_ids: &Vec<String>) -> Option<Channel> {
+    fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
         for channel in self.entities.iter() {
             if channel.contact_ids.clone().sort() == contact_ids.clone().sort() {
                 return Some(channel.clone());

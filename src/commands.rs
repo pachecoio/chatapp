@@ -1,9 +1,10 @@
+use crate::adapters::IdType;
 use crate::models::ChannelType;
 
 pub struct SendMessage {
-    pub channel_id: Option<String>,
-    pub from: String,
-    pub to: String,
+    pub channel_id: Option<IdType>,
+    pub from: IdType,
+    pub to: IdType,
     pub content: String,
 }
 
@@ -13,7 +14,7 @@ pub struct CreateContact {
 }
 
 pub struct UpdateContact {
-    pub id: String,
+    pub id: IdType,
     pub name: Option<String>,
     pub email: Option<String>,
 }
@@ -21,5 +22,5 @@ pub struct UpdateContact {
 pub struct CreateChannel {
     pub name: String,
     pub channel_type: ChannelType,
-    pub contact_ids: Vec<String>,
+    pub contact_ids: Vec<IdType>,
 }

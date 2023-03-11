@@ -21,11 +21,7 @@ impl<'a> ContactService<'a> {
         &mut self,
         cmd: &commands::CreateContact,
     ) -> Result<Contact, RepositoryError> {
-        let contact = Contact {
-            id: uuid::Uuid::new_v4().to_string(),
-            name: cmd.name.clone(),
-            email: cmd.email.clone(),
-        };
+        let contact = Contact::new(&cmd.name, &cmd.email);
         self.repository.create(&contact).await?;
 
         Ok(contact)

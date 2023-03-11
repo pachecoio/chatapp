@@ -1,4 +1,4 @@
-use crate::adapters::{Model, Repository, RepositoryError};
+use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::Contact;
 use async_trait::async_trait;
 use futures::TryStreamExt;
@@ -36,11 +36,11 @@ where
         todo!()
     }
 
-    async fn delete(&mut self, _id: &str) -> Result<(), RepositoryError> {
+    async fn delete(&mut self, _id: &IdType) -> Result<(), RepositoryError> {
         todo!()
     }
 
-    async fn get(&self, _id: &str) -> Option<M> {
+    async fn get(&self, _id: &IdType) -> Option<M> {
         todo!()
     }
 
