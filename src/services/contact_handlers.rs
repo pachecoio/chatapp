@@ -1,8 +1,7 @@
-use crate::adapters::{Repository, RepositoryError};
 use crate::adapters::contact_repository::ContactRepository;
+use crate::adapters::{Repository, RepositoryError};
 use crate::commands;
 use crate::models::Contact;
-
 
 pub struct ContactService<'a> {
     repository: &'a mut dyn ContactRepository,

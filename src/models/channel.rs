@@ -1,7 +1,6 @@
 use crate::adapters::{IdType, Model};
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug};
-
+use std::fmt::Debug;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Channel {

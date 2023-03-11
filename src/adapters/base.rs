@@ -1,9 +1,9 @@
 use async_trait::async_trait;
 
-use serde::de::DeserializeOwned;
-use serde::{Serialize, Deserialize};
-use std::fmt::{Debug, Display, Formatter};
 use mongodb::bson::oid::ObjectId;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Debug, Display, Formatter};
 
 pub trait Model: Clone + Debug + Send + Sync + Serialize + DeserializeOwned {
     fn id(&self) -> &IdType;

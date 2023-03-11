@@ -1,9 +1,9 @@
+use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::Contact;
 use async_trait::async_trait;
 use futures::TryStreamExt;
 use serde::de::DeserializeOwned;
-use crate::adapters::contact_repository::ContactRepository;
 
 pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,

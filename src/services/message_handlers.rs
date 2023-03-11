@@ -3,9 +3,9 @@ use crate::commands;
 
 use crate::models::{Channel, ChannelType, Contact, Message};
 
-use std::fmt::{Display, Formatter};
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
+use std::fmt::{Display, Formatter};
 
 pub struct MessageService {
     repository: Box<dyn Repository<Message>>,

@@ -13,8 +13,6 @@ pub async fn init(db_name: &str) -> Database {
 #[cfg(test)]
 mod tests {
     use crate::adapters::mongo::database::init;
-    
-    
 
     #[actix_web::test]
     async fn test_init() {

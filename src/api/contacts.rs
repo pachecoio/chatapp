@@ -1,7 +1,5 @@
-
-use crate::{AppState};
+use crate::AppState;
 use actix_web::{get, web, Error, HttpResponse};
-
 
 #[get("/contacts")]
 pub async fn get_contacts(_data: web::Data<AppState>) -> Result<HttpResponse, Error> {

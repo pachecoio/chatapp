@@ -1,8 +1,8 @@
+use crate::adapters::channel_repository::ChannelRepository;
+use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact};
 use async_trait::async_trait;
-use crate::adapters::channel_repository::ChannelRepository;
-use crate::adapters::contact_repository::ContactRepository;
 
 pub struct InMemoryRepository<M> {
     pub entities: Vec<M>,

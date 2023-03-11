@@ -1,5 +1,5 @@
 mod base;
-pub use base::{Model, IdType, Repository, RepositoryError};
+pub use base::{IdType, Model, Repository, RepositoryError};
 
 pub mod channel_repository;
 pub mod contact_repository;

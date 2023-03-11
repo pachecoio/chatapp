@@ -1,5 +1,5 @@
-use mongodb::bson::oid::ObjectId;
 use crate::adapters::{IdType, Model};
+use mongodb::bson::oid::ObjectId;
 
 use serde::{Deserialize, Serialize};
 
