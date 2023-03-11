@@ -16,7 +16,7 @@ pub struct Message {
     pub updated_at: DateTime<Utc>,
 }
 
-impl Model<'_> for Message {
+impl Model for Message {
     fn id(&self) -> &str {
         &self.id
     }

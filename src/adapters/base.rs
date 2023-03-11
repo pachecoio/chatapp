@@ -2,14 +2,16 @@ use crate::adapters::ChannelRepository;
 use crate::models::Channel;
 use std::fmt::Debug;
 use async_trait::async_trait;
+use futures::stream::TryStreamExt;
 use serde::{Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 
-pub trait Model<'a>: Clone + Debug + Send + Sync + Serialize + Deserialize<'a> {
+pub trait Model: Clone + Debug + Send + Sync + Serialize + DeserializeOwned {
     fn id(&self) -> &str;
 }
 
 #[async_trait]
-pub trait Repository<M: for<'a> Model<'a>> {
+pub trait Repository<M: Model> {
     async fn create(&mut self, entity: &M) -> Result<M, String>;
     async fn update(&mut self, entity: &M) -> Result<(), String>;
     async fn delete(&mut self, id: &str) -> Result<(), String>;
@@ -21,7 +23,7 @@ pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,
 }
 
-impl<M: for<'a> Model<'a>> MongoRepository<M> {
+impl<M: Model> MongoRepository<M> {
     pub fn new(db: &mongodb::Database, collection_name: &str) -> Self {
         MongoRepository {
             collection: db.collection(collection_name)
@@ -30,7 +32,7 @@ impl<M: for<'a> Model<'a>> MongoRepository<M> {
 }
 
 #[async_trait]
-impl<M: for <'a> Model<'a>> Repository<M> for MongoRepository<M> {
+impl<M> Repository<M> for MongoRepository<M> where M: Model + DeserializeOwned + Unpin + Send + Sync {
     async fn create(&mut self, model: &M) -> Result<M, String> {
         let result = self.collection.insert_one(model, None).await;
         match result {
@@ -52,7 +54,14 @@ impl<M: for <'a> Model<'a>> Repository<M> for MongoRepository<M> {
     }
 
     async fn list(&self) -> Result<Vec<M>, String> {
-        todo!()
+        let mut cursor = self.collection.find(None, None).await.unwrap();
+        let mut models = Vec::new();
+
+        while let Some(result) = cursor.try_next().await.unwrap() {
+            models.push(result);
+        }
+
+        Ok(models)
     }
 }
 
@@ -63,7 +72,7 @@ pub struct InMemoryRepository<M> {
 
 #[cfg(test)]
 #[async_trait]
-impl<M: for<'a> Model<'a>> Repository<M> for InMemoryRepository<M> {
+impl<M: Model> Repository<M> for InMemoryRepository<M> {
     async fn create(&mut self, entity: &M) -> Result<M, String> {
         self.entities.push(entity.clone());
         Ok(entity.clone())
@@ -107,6 +116,6 @@ impl<M: for<'a> Model<'a>> Repository<M> for InMemoryRepository<M> {
 
 /// Creates an in-memory repository with base methods implemented
 #[cfg(test)]
-pub fn mock_repo<M: for<'a> Model<'a>>() -> impl Repository<M> {
+pub fn mock_repo<M: Model>() -> impl Repository<M> {
     InMemoryRepository { entities: vec![] }
 }

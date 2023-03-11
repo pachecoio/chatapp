@@ -1,5 +1,6 @@
 use crate::adapters::Model;
 use serde::{Deserialize, Serialize};
+use futures::stream::TryStreamExt;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Contact {
@@ -8,7 +9,7 @@ pub struct Contact {
     pub email: String,
 }
 
-impl Model<'_> for Contact {
+impl Model for Contact {
     fn id(&self) -> &str {
         &self.id
     }

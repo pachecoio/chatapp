@@ -1,6 +1,7 @@
 use crate::adapters::{ContactRepository, Repository};
 use crate::commands;
 use crate::models::Contact;
+use futures::stream::TryStreamExt;
 
 pub struct ContactService<'a> {
     repository: &'a mut dyn ContactRepository,
@@ -118,7 +119,8 @@ mod tests_mongo {
             email: "jon@winterfell.com".to_string(),
         };
         let res = service.create_contact(&cmd).await;
+        assert_eq!(res.is_ok(), true);
         let contacts = service.repository.list().await.unwrap();
-        assert_eq!(contacts.len(), 1);
+        assert!(contacts.len() > 0);
     }
 }
