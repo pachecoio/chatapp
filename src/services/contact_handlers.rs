@@ -108,13 +108,13 @@ mod tests {
 
 #[cfg(test)]
 mod tests_mongo {
-    use crate::adapters::{MongoRepository};
+    use crate::adapters::mongo::repository::MongoRepository;
     use crate::commands;
     use crate::services::ContactService;
 
     #[actix_web::test]
     async fn can_create_contact() {
-        let db = crate::adapters::database::init("test").await;
+        let db = crate::adapters::mongo::database::init("test").await;
         let mut repo = MongoRepository::new(&db, "contacts");
         let mut service = ContactService::new(&mut repo);
         let cmd = commands::CreateContact {

@@ -1,7 +1,7 @@
 mod base;
 mod channel_repository;
 mod contact_repository;
-pub mod database;
+pub mod mongo;
 
 pub use base::Model;
 pub use base::{
@@ -9,14 +9,17 @@ pub use base::{
     RepositoryError
 };
 
-#[cfg(test)]
-pub use base::mock_repo;
 pub use channel_repository::ChannelRepository;
 pub use contact_repository::ContactRepository;
 
 #[cfg(test)]
-pub use channel_repository::mock_channel_repo;
-#[cfg(test)]
-pub use contact_repository::mock_contact_repo;
+mod in_memory;
 
-pub use base::MongoRepository;
+#[cfg(test)]
+pub use in_memory::repository::InMemoryRepository;
+#[cfg(test)]
+pub use in_memory::repository::mock_repo;
+#[cfg(test)]
+pub use in_memory::repository::mock_channel_repo;
+#[cfg(test)]
+pub use in_memory::repository::mock_contact_repo;

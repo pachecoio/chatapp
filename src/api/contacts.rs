@@ -1,7 +1,6 @@
 use actix_web::{Error, HttpResponse, web, get};
 use serde_json::json;
 use crate::{AppState, services};
-use crate::adapters::MongoRepository;
 use crate::services::ContactService;
 
 #[get("/contacts")]

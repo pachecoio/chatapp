@@ -11,7 +11,7 @@ pub async fn init(db_name: &str) -> Database {
 #[cfg(test)]
 mod tests {
     use mongodb::Collection;
-    use crate::adapters::database::init;
+    use crate::adapters::mongo::database::init;
     use crate::models::Contact;
 
     #[actix_web::test]
