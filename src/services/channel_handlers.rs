@@ -64,7 +64,7 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 mod tests {
     use crate::adapters::{mock_repo, Model, Repository};
     use crate::commands;
-    use crate::models::{Channel, ChannelType, Contact};
+    use crate::models::{ChannelType, Contact};
     use crate::services::channel_handlers::ChannelService;
 
     /// Creates a mock repository with two contacts

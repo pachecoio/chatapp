@@ -1,7 +1,8 @@
-use crate::adapters::{ContactRepository, Repository, RepositoryError};
+use crate::adapters::{Repository, RepositoryError};
+use crate::adapters::contact_repository::ContactRepository;
 use crate::commands;
 use crate::models::Contact;
-use futures::stream::TryStreamExt;
+
 
 pub struct ContactService<'a> {
     repository: &'a mut dyn ContactRepository,
@@ -55,7 +56,7 @@ impl<'a> ContactService<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_contact_repo, mock_repo, Model, RepositoryError};
+    use crate::adapters::{mock_contact_repo, Model, RepositoryError};
     use crate::commands;
     use crate::models::Contact;
     use crate::services::contact_handlers::{ContactService, Repository};
@@ -72,7 +73,7 @@ mod tests {
     async fn can_create_contact() {
         let mut repo = mock_contact_repo();
         let mut service = ContactService::new(&mut repo);
-        let res = _create_contact(&mut service).await;
+        let _res = _create_contact(&mut service).await;
         let contacts = service.repository.list().await.unwrap();
         assert_eq!(contacts.len(), 1);
     }
@@ -81,13 +82,13 @@ mod tests {
     async fn can_update_contact() {
         let mut repo = mock_contact_repo();
         let mut service = ContactService::new(&mut repo);
-        let res = _create_contact(&mut service).await;
+        let _res = _create_contact(&mut service).await;
         let contacts = service.repository.list().await.unwrap();
         let id = contacts.first().unwrap().id.clone();
 
         let contact = service.repository.get(&id).await;
         assert!(contact.is_some());
-        let contact = contact.unwrap();
+        let _contact = contact.unwrap();
 
         let cmd = commands::UpdateContact {
             id: id.clone(),
@@ -105,7 +106,7 @@ mod tests {
     async fn can_delete_contact() {
         let mut repo = mock_contact_repo();
         let mut service = ContactService::new(&mut repo);
-        let res = _create_contact(&mut service).await;
+        let _res = _create_contact(&mut service).await;
         let contacts = service.repository.list().await.unwrap();
         let id = contacts.first().unwrap().id.clone();
 
@@ -134,6 +135,6 @@ mod tests_mongo {
         let res = service.create_contact(&cmd).await;
         assert_eq!(res.is_ok(), true);
         let contacts = service.repository.list().await.unwrap();
-        assert!(contacts.len() > 0);
+        assert!(!contacts.is_empty());
     }
 }

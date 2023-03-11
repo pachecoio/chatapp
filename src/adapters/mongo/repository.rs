@@ -1,8 +1,9 @@
-use crate::adapters::{ContactRepository, Model, Repository, RepositoryError};
+use crate::adapters::{Model, Repository, RepositoryError};
 use crate::models::Contact;
 use async_trait::async_trait;
 use futures::TryStreamExt;
 use serde::de::DeserializeOwned;
+use crate::adapters::contact_repository::ContactRepository;
 
 pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,
@@ -31,15 +32,15 @@ where
         }
     }
 
-    async fn update(&mut self, model: &M) -> Result<(), RepositoryError> {
+    async fn update(&mut self, _model: &M) -> Result<(), RepositoryError> {
         todo!()
     }
 
-    async fn delete(&mut self, id: &str) -> Result<(), RepositoryError> {
+    async fn delete(&mut self, _id: &str) -> Result<(), RepositoryError> {
         todo!()
     }
 
-    async fn get(&self, id: &str) -> Option<M> {
+    async fn get(&self, _id: &str) -> Option<M> {
         todo!()
     }
 

@@ -1,9 +1,11 @@
-use crate::adapters::{ChannelRepository, ContactRepository, Repository};
+use crate::adapters::{Repository};
 use crate::commands;
-use crate::commands::SendMessage;
+
 use crate::models::{Channel, ChannelType, Contact, Message};
-use async_trait::async_trait;
+
 use std::fmt::{Display, Formatter};
+use crate::adapters::channel_repository::ChannelRepository;
+use crate::adapters::contact_repository::ContactRepository;
 
 pub struct MessageService {
     repository: Box<dyn Repository<Message>>,
@@ -50,7 +52,7 @@ impl MessageService {
     async fn get_contact(&mut self, id: &String) -> Result<Contact, MessageError> {
         match self.contact_repository.get(id).await {
             None => Err(MessageError {
-                message: format!("Contact with id {} not found", id),
+                message: format!("Contact with id {id} not found"),
             }),
             Some(c) => Ok(c),
         }
@@ -59,7 +61,7 @@ impl MessageService {
     async fn get_channel(&mut self, id: &String) -> Result<Channel, MessageError> {
         match self.channel_repository.get(id).await {
             None => Err(MessageError {
-                message: format!("Channel with id {} not found", id),
+                message: format!("Channel with id {id} not found"),
             }),
             Some(c) => Ok(c),
         }
@@ -108,7 +110,7 @@ mod tests {
         repo.create(&Contact::new("Arya Stark", "arya@winterfell.com"))
             .await
             .unwrap();
-        repo.list().await.unwrap().clone()
+        repo.list().await.unwrap()
     }
 
     async fn add_channel(
@@ -134,7 +136,7 @@ mod tests {
         let mut service =
             MessageService::new(mock_repo(), mock_channel_repo(), mock_contact_repo());
         let contacts = add_contacts(&mut service.contact_repository).await;
-        let channel = add_channel(&mut service.channel_repository, &contacts).await;
+        let _channel = add_channel(&mut service.channel_repository, &contacts).await;
 
         let cmd = commands::SendMessage {
             channel_id: None,

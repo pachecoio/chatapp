@@ -1,6 +1,8 @@
-use crate::adapters::{ChannelRepository, ContactRepository, Model, Repository, RepositoryError};
+use crate::adapters::{Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact};
 use async_trait::async_trait;
+use crate::adapters::channel_repository::ChannelRepository;
+use crate::adapters::contact_repository::ContactRepository;
 
 pub struct InMemoryRepository<M> {
     pub entities: Vec<M>,
@@ -49,7 +51,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         Ok(())
     }
 
-    async fn get(&self, id: &str) -> Option<M> {
+    async fn get(&self, _id: &str) -> Option<M> {
         for entity in self.entities.iter() {
             let id = entity.id();
             if id == id {

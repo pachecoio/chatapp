@@ -1,9 +1,9 @@
-use crate::adapters::ChannelRepository;
-use crate::models::Channel;
+
+
 use async_trait::async_trait;
-use futures::stream::TryStreamExt;
+
 use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 use std::fmt::{Debug, Display, Formatter};
 
 pub trait Model: Clone + Debug + Send + Sync + Serialize + DeserializeOwned {

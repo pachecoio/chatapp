@@ -1,5 +1,5 @@
 use crate::adapters::Model;
-use futures::stream::TryStreamExt;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

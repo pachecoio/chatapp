@@ -1,7 +1,7 @@
 use crate::adapters::Model;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
-use uuid;
+use std::fmt::{Debug};
+
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Channel {

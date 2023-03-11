@@ -1,13 +1,10 @@
 mod base;
-mod channel_repository;
-mod contact_repository;
-pub mod mongo;
-
 pub use base::Model;
 pub use base::{Repository, RepositoryError};
 
-pub use channel_repository::ChannelRepository;
-pub use contact_repository::ContactRepository;
+pub mod channel_repository;
+pub mod contact_repository;
+pub mod mongo;
 
 #[cfg(test)]
 mod in_memory;
