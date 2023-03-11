@@ -1,6 +1,6 @@
 use crate::adapters::ChannelRepository;
 use crate::models::Channel;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display, Formatter};
 use async_trait::async_trait;
 use futures::stream::TryStreamExt;
 use serde::{Deserialize, Serialize};
@@ -12,11 +12,22 @@ pub trait Model: Clone + Debug + Send + Sync + Serialize + DeserializeOwned {
 
 #[async_trait]
 pub trait Repository<M: Model> {
-    async fn create(&mut self, entity: &M) -> Result<M, String>;
-    async fn update(&mut self, entity: &M) -> Result<(), String>;
-    async fn delete(&mut self, id: &str) -> Result<(), String>;
+    async fn create(&mut self, entity: &M) -> Result<M, RepositoryError>;
+    async fn update(&mut self, entity: &M) -> Result<(), RepositoryError>;
+    async fn delete(&mut self, id: &str) -> Result<(), RepositoryError>;
     async fn get(&self, id: &str) -> Option<M>;
-    async fn list(&self) -> Result<Vec<M>, String>;
+    async fn list(&self) -> Result<Vec<M>, RepositoryError>;
+}
+
+#[derive(Debug)]
+pub struct RepositoryError {
+    pub message: String,
+}
+
+impl Display for RepositoryError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
 }
 
 pub struct MongoRepository<M> {
@@ -33,19 +44,19 @@ impl<M: Model> MongoRepository<M> {
 
 #[async_trait]
 impl<M> Repository<M> for MongoRepository<M> where M: Model + DeserializeOwned + Unpin + Send + Sync {
-    async fn create(&mut self, model: &M) -> Result<M, String> {
+    async fn create(&mut self, model: &M) -> Result<M, RepositoryError> {
         let result = self.collection.insert_one(model, None).await;
         match result {
             Ok(_) => Ok(model.clone()),
-            Err(e) => Err(e.to_string()),
+            Err(e) => Err(RepositoryError { message: e.to_string() }),
         }
     }
 
-    async fn update(&mut self, model: &M) -> Result<(), String> {
+    async fn update(&mut self, model: &M) -> Result<(), RepositoryError> {
         todo!()
     }
 
-    async fn delete(&mut self, id: &str) -> Result<(), String> {
+    async fn delete(&mut self, id: &str) -> Result<(), RepositoryError> {
         todo!()
     }
 
@@ -53,7 +64,7 @@ impl<M> Repository<M> for MongoRepository<M> where M: Model + DeserializeOwned +
         todo!()
     }
 
-    async fn list(&self) -> Result<Vec<M>, String> {
+    async fn list(&self) -> Result<Vec<M>, RepositoryError> {
         let mut cursor = self.collection.find(None, None).await.unwrap();
         let mut models = Vec::new();
 
@@ -73,13 +84,16 @@ pub struct InMemoryRepository<M> {
 #[cfg(test)]
 #[async_trait]
 impl<M: Model> Repository<M> for InMemoryRepository<M> {
-    async fn create(&mut self, entity: &M) -> Result<M, String> {
+    async fn create(&mut self, entity: &M) -> Result<M, RepositoryError> {
         self.entities.push(entity.clone());
         Ok(entity.clone())
     }
 
-    async fn update(&mut self, entity: &M) -> Result<(), String> {
-        let contact = self.get(entity.id()).await.ok_or("Entity not found")?;
+    async fn update(&mut self, entity: &M) -> Result<(), RepositoryError> {
+        let contact = match self.get(entity.id()).await {
+            Some(c) => c,
+            None => return Err(RepositoryError { message: "Entity not found".to_string() }),
+        };
         let index = self
             .entities
             .iter()
@@ -89,8 +103,11 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         Ok(())
     }
 
-    async fn delete(&mut self, id: &str) -> Result<(), String> {
-        let contact = self.get(id).await.ok_or("Entity not found")?;
+    async fn delete(&mut self, id: &str) -> Result<(), RepositoryError> {
+        let contact = match self.get(id).await {
+            Some(c) => c,
+            None => return Err(RepositoryError { message: "Entity not found".to_string() }),
+        };
         let index = self
             .entities
             .iter()
@@ -109,7 +126,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         }
         None
     }
-    async fn list(&self) -> Result<Vec<M>, String> {
+    async fn list(&self) -> Result<Vec<M>, RepositoryError> {
         Ok(self.entities.clone())
     }
 }

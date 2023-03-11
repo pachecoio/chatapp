@@ -1,4 +1,4 @@
-use crate::adapters::{ContactRepository, Repository};
+use crate::adapters::{ContactRepository, Repository, RepositoryError};
 use crate::commands;
 use crate::models::Contact;
 use futures::stream::TryStreamExt;
@@ -12,11 +12,11 @@ impl<'a> ContactService<'a> {
         ContactService { repository: repo }
     }
 
-    async fn list(&self) -> Result<Vec<Contact>, String> {
+    async fn list(&self) -> Result<Vec<Contact>, RepositoryError> {
         self.repository.list().await
     }
 
-    async fn create_contact(&mut self, cmd: &commands::CreateContact) -> Result<Contact, String> {
+    async fn create_contact(&mut self, cmd: &commands::CreateContact) -> Result<Contact, RepositoryError> {
         let contact = Contact {
             id: uuid::Uuid::new_v4().to_string(),
             name: cmd.name.clone(),
@@ -27,8 +27,11 @@ impl<'a> ContactService<'a> {
         Ok(contact)
     }
 
-    async fn update_contact(&mut self, cmd: &commands::UpdateContact) -> Result<Contact, String> {
-        let mut contact = self.repository.get(&cmd.id).await.ok_or("Contact not found")?;
+    async fn update_contact(&mut self, cmd: &commands::UpdateContact) -> Result<Contact, RepositoryError> {
+        let mut contact = match self.repository.get(&cmd.id).await {
+            Some(c) => c,
+            None => return Err(RepositoryError { message: "Contact not found".to_string() }),
+        };
         if let Some(name) = &cmd.name {
             contact.name = name.clone();
         }
@@ -42,12 +45,12 @@ impl<'a> ContactService<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_repo, Model, mock_contact_repo};
+    use crate::adapters::{mock_repo, Model, mock_contact_repo, RepositoryError};
     use crate::commands;
     use crate::models::Contact;
     use crate::services::contact_handlers::{Repository, ContactService};
 
-    async fn _create_contact(service: &mut ContactService<'_>) -> Result<Contact, String> {
+    async fn _create_contact(service: &mut ContactService<'_>) -> Result<Contact, RepositoryError> {
         let cmd = commands::CreateContact {
             name: "Jon Snow".to_string(),
             email: "jon@winterfell.com".to_string(),

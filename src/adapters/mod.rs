@@ -4,7 +4,10 @@ mod contact_repository;
 pub mod database;
 
 pub use base::Model;
-pub use base::Repository;
+pub use base::{
+    Repository,
+    RepositoryError
+};
 
 #[cfg(test)]
 pub use base::mock_repo;

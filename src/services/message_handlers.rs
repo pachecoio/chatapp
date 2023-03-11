@@ -40,7 +40,7 @@ impl MessageService {
         let message = Message::new(&channel.id, &cmd.from, &cmd.to, &cmd.content);
         match self.repository.create(&message).await {
             Ok(_) => Ok(()),
-            Err(e) => Err(MessageError { message: e }),
+            Err(e) => Err(MessageError { message: e.to_string() }),
         }
     }
 
@@ -72,7 +72,7 @@ impl MessageService {
                 let channel = Channel::new("", ChannelType::Private, contact_ids);
                 match self.channel_repository.create(&channel).await {
                     Ok(c) => Ok(c),
-                    Err(e) => Err(MessageError { message: e }),
+                    Err(e) => Err(MessageError { message: e.to_string() }),
                 }
             }
         }
