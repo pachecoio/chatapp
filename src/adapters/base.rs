@@ -18,8 +18,8 @@ pub enum IdType {
 impl Display for IdType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            IdType::String(s) => write!(f, "{}", s),
-            IdType::ObjectId(o) => write!(f, "{}", o),
+            IdType::String(s) => write!(f, "{s}"),
+            IdType::ObjectId(o) => write!(f, "{o}"),
         }
     }
 }
