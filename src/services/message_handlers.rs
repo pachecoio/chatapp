@@ -2,8 +2,8 @@ use crate::adapters::{ChannelRepository, ContactRepository, Repository};
 use crate::commands;
 use crate::commands::SendMessage;
 use crate::models::{Channel, ChannelType, Contact, Message};
-use std::fmt::{Display, Formatter};
 use async_trait::async_trait;
+use std::fmt::{Display, Formatter};
 
 pub struct MessageService {
     repository: Box<dyn Repository<Message>>,
@@ -33,14 +33,17 @@ impl MessageService {
         let contact_to = self.get_contact(&cmd.to).await?;
         let channel = match &cmd.channel_id {
             None => {
-                self.create_private_channel(&vec![contact_from.id.clone(), contact_to.id.clone()]).await?
+                self.create_private_channel(&vec![contact_from.id.clone(), contact_to.id.clone()])
+                    .await?
             }
             Some(c) => self.get_channel(c).await?,
         };
         let message = Message::new(&channel.id, &cmd.from, &cmd.to, &cmd.content);
         match self.repository.create(&message).await {
             Ok(_) => Ok(()),
-            Err(e) => Err(MessageError { message: e.to_string() }),
+            Err(e) => Err(MessageError {
+                message: e.to_string(),
+            }),
         }
     }
 
@@ -72,7 +75,9 @@ impl MessageService {
                 let channel = Channel::new("", ChannelType::Private, contact_ids);
                 match self.channel_repository.create(&channel).await {
                     Ok(c) => Ok(c),
-                    Err(e) => Err(MessageError { message: e.to_string() }),
+                    Err(e) => Err(MessageError {
+                        message: e.to_string(),
+                    }),
                 }
             }
         }
@@ -106,7 +111,10 @@ mod tests {
         repo.list().await.unwrap().clone()
     }
 
-    async fn add_channel(repo: &mut Box<dyn ChannelRepository>, contacts: &Vec<Contact>) -> Channel {
+    async fn add_channel(
+        repo: &mut Box<dyn ChannelRepository>,
+        contacts: &Vec<Contact>,
+    ) -> Channel {
         let cmd = commands::CreateChannel {
             name: "The North Remembers".to_string(),
             channel_type: ChannelType::Private,
@@ -116,7 +124,8 @@ mod tests {
             &cmd.name,
             cmd.channel_type.clone(),
             &cmd.contact_ids,
-        )).await
+        ))
+        .await
         .unwrap()
     }
 

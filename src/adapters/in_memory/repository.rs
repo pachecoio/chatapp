@@ -1,6 +1,6 @@
 use crate::adapters::{ChannelRepository, ContactRepository, Model, Repository, RepositoryError};
-use async_trait::async_trait;
 use crate::models::{Channel, Contact};
+use async_trait::async_trait;
 
 pub struct InMemoryRepository<M> {
     pub entities: Vec<M>,
@@ -16,7 +16,11 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
     async fn update(&mut self, entity: &M) -> Result<(), RepositoryError> {
         let contact = match self.get(entity.id()).await {
             Some(c) => c,
-            None => return Err(RepositoryError { message: "Entity not found".to_string() }),
+            None => {
+                return Err(RepositoryError {
+                    message: "Entity not found".to_string(),
+                })
+            }
         };
         let index = self
             .entities
@@ -30,7 +34,11 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
     async fn delete(&mut self, id: &str) -> Result<(), RepositoryError> {
         let contact = match self.get(id).await {
             Some(c) => c,
-            None => return Err(RepositoryError { message: "Entity not found".to_string() }),
+            None => {
+                return Err(RepositoryError {
+                    message: "Entity not found".to_string(),
+                })
+            }
         };
         let index = self
             .entities

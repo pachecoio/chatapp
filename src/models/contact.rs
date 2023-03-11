@@ -1,6 +1,6 @@
 use crate::adapters::Model;
-use serde::{Deserialize, Serialize};
 use futures::stream::TryStreamExt;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Contact {
