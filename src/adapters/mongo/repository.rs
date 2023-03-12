@@ -101,6 +101,28 @@ impl ContactRepository for MongoRepository<Contact> {}
 
 #[async_trait]
 impl ChannelRepository for MongoRepository<Channel> {
+    async fn find_by_contact_id(&self, contact_id: &IdType) -> Result<Vec<Channel>, RepositoryError> {
+        let object_id = match contact_id {
+            IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
+            IdType::ObjectId(o) => *o,
+        };
+        let mut cursor = self
+            .collection
+            .find(
+                Some(doc! {
+                    "contact_ids": {"ObjectId": object_id}
+                }),
+                None,
+            )
+            .await
+            .unwrap();
+        let mut channels = Vec::new();
+        while let Some(result) = cursor.try_next().await.unwrap() {
+            channels.push(result);
+        }
+        Ok(channels)
+    }
+
     async fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
         let ids = contact_ids
             .iter()

@@ -68,6 +68,19 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
 
 #[async_trait]
 impl ChannelRepository for InMemoryRepository<Channel> {
+    async fn find_by_contact_id(
+        &self,
+        contact_id: &IdType,
+    ) -> Result<Vec<Channel>, RepositoryError> {
+        let mut channels = Vec::new();
+        for channel in self.entities.iter() {
+            if channel.contact_ids.contains(contact_id) {
+                channels.push(channel.clone());
+            }
+        }
+        Ok(channels)
+    }
+
     async fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
         for channel in self.entities.iter() {
             if channel.contact_ids.clone().sort() == contact_ids.clone().sort() {

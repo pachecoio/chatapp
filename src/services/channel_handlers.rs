@@ -1,6 +1,6 @@
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
-use crate::adapters::Repository;
+use crate::adapters::{IdType, Repository};
 use crate::commands;
 use crate::models::{Channel, ChannelType};
 
@@ -33,6 +33,16 @@ impl<'a> ChannelService<'a> {
             }),
         }
     }
+
+    pub async fn find_contact_channels(&mut self, contact_id: &IdType) -> Result<Vec<Channel>, ChannelError> {
+        match self.repository.find_by_contact_id(contact_id).await {
+            Ok(c) => Ok(c),
+            Err(e) => Err(ChannelError {
+                message: e.to_string(),
+            }),
+        }
+    }
+
 }
 
 #[derive(Debug)]
@@ -132,12 +142,50 @@ mod tests {
         assert_eq!(channel.contact_ids.len(), 2);
         assert_eq!(channel.channel_type, ChannelType::Group);
     }
+
+    #[actix_web::test]
+    async fn find_contact_channels() {
+        let mut repo = mock_channel_repo();
+        let mut c_repo = mock_contact_repo();
+        let contacts = add_mock_contacts(&mut c_repo).await;
+        let mut service = ChannelService::new(&mut repo, &mut c_repo);
+        let cmd = commands::CreateChannel {
+            name: "Private channel".to_string(),
+            channel_type: ChannelType::Private,
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
+        };
+
+        // Create a private channel
+        let res = service.create_channel(&cmd).await;
+        assert!(res.is_ok());
+        let channel = res.unwrap();
+        assert_eq!(channel.contact_ids.len(), 2);
+
+        // Create group channel
+        let cmd = commands::CreateChannel {
+            name: "Group channel".to_string(),
+            channel_type: ChannelType::Group,
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
+        };
+        let res = service.create_channel(&cmd).await;
+        assert!(res.is_ok());
+        let channel = res.unwrap();
+        assert_eq!(channel.contact_ids.len(), 2);
+
+        // Find channels for a contact
+        let res = service.find_contact_channels(&contacts[0].id()).await;
+        assert!(res.is_ok());
+        let channels = res.unwrap();
+        assert_eq!(channels.len(), 2);
+    }
 }
 
 #[cfg(test)]
 mod tests_mongo {
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::adapters::{Model, Repository};
+    use crate::commands;
+    use crate::models::ChannelType;
 
     use crate::services::channel_handlers::tests::add_mock_contacts;
     use crate::services::ChannelService;
@@ -174,5 +222,42 @@ mod tests_mongo {
 
         let res = repo.delete(&channel.id()).await;
         assert!(res.is_ok());
+    }
+
+    #[actix_web::test]
+    async fn find_contact_channels() {
+        let db = crate::adapters::mongo::database::init("test").await;
+        let mut repo = MongoRepository::new(&db, "channels");
+        let mut c_repo = MongoRepository::new(&db, "contacts");
+        let contacts = add_mock_contacts(&mut c_repo).await;
+
+        let mut service = ChannelService::new(&mut repo, &mut c_repo);
+        let cmd = commands::CreateChannel {
+            name: "Private channel".to_string(),
+            channel_type: crate::models::ChannelType::Private,
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
+        };
+        let res = service.create_channel(&cmd).await;
+        assert!(res.is_ok());;
+
+        let channel = res.unwrap();
+        assert_eq!(channel.contact_ids.len(), 2);
+
+        // Create group channel
+        let cmd = commands::CreateChannel {
+            name: "Group channel".to_string(),
+            channel_type: ChannelType::Group,
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
+        };
+        let res = service.create_channel(&cmd).await;
+        assert!(res.is_ok());
+        let channel = res.unwrap();
+        assert_eq!(channel.contact_ids.len(), 2);
+
+        // Find channels for a contact
+        let res = service.find_contact_channels(&contacts[0].id()).await;
+        assert!(res.is_ok());
+        let channels = res.unwrap();
+        assert_eq!(channels.len(), 2);
     }
 }
