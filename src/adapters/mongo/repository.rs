@@ -1,13 +1,13 @@
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
+use crate::adapters::message_repository::MessageRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact, Message};
 use async_trait::async_trait;
 use futures::TryStreamExt;
-use mongodb::bson::{doc, Document};
 use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{doc, Document};
 use serde::de::DeserializeOwned;
-use crate::adapters::message_repository::MessageRepository;
 
 pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,
@@ -102,16 +102,18 @@ impl ContactRepository for MongoRepository<Contact> {}
 #[async_trait]
 impl ChannelRepository for MongoRepository<Channel> {
     async fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
-        let ids = contact_ids.iter().map(|id| {
-            match id {
+        let ids = contact_ids
+            .iter()
+            .map(|id| match id {
                 IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
                 IdType::ObjectId(o) => o.clone(),
-            }
-        }).map(|id|
-            doc! {
-                "ObjectId": id
-            }
-        ).collect::<Vec<Document>>();
+            })
+            .map(|id| {
+                doc! {
+                    "ObjectId": id
+                }
+            })
+            .collect::<Vec<Document>>();
 
         self.collection
             .find_one(
@@ -129,7 +131,12 @@ impl ChannelRepository for MongoRepository<Channel> {
 
 #[async_trait]
 impl MessageRepository for MongoRepository<Message> {
-    async fn get_by_channel_id(&self, channel_id: &IdType, limit: i64, offset: u64) -> Result<Vec<Message>, RepositoryError> {
+    async fn get_by_channel_id(
+        &self,
+        channel_id: &IdType,
+        limit: i64,
+        offset: u64,
+    ) -> Result<Vec<Message>, RepositoryError> {
         let object_id = match channel_id {
             IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
             IdType::ObjectId(o) => o.clone(),
@@ -142,11 +149,14 @@ impl MessageRepository for MongoRepository<Message> {
 
         let mut cursor = self
             .collection
-            .find(Some(doc! {
-                "channel_id": {
-                    "ObjectId": object_id
-                },
-            }), options)
+            .find(
+                Some(doc! {
+                    "channel_id": {
+                        "ObjectId": object_id
+                    },
+                }),
+                options,
+            )
             .await
             .unwrap();
         let mut messages = Vec::new();

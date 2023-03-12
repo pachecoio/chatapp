@@ -88,9 +88,7 @@ async fn add_mock_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> 
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{
-        mock_channel_repo, mock_contact_repo, mock_repo, Model, Repository,
-    };
+    use crate::adapters::{mock_channel_repo, mock_contact_repo, mock_repo, Model, Repository};
     use crate::commands;
     use crate::models::{ChannelType, Contact};
     use crate::services::channel_handlers::{add_mock_contacts, ChannelService};

@@ -1,9 +1,9 @@
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
+use crate::adapters::message_repository::MessageRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact, Message};
 use async_trait::async_trait;
-use crate::adapters::message_repository::MessageRepository;
 
 pub struct InMemoryRepository<M> {
     pub entities: Vec<M>,
@@ -82,7 +82,12 @@ impl ContactRepository for InMemoryRepository<Contact> {}
 
 #[async_trait]
 impl MessageRepository for InMemoryRepository<Message> {
-    async fn get_by_channel_id(&self, channel_id: &IdType, limit: i64, offset: u64) -> Result<Vec<Message>, RepositoryError> {
+    async fn get_by_channel_id(
+        &self,
+        channel_id: &IdType,
+        limit: i64,
+        offset: u64,
+    ) -> Result<Vec<Message>, RepositoryError> {
         let mut messages = Vec::new();
         for message in self.entities.iter() {
             if message.channel_id == *channel_id {

@@ -11,9 +11,5 @@ pub mod message_repository;
 
 #[cfg(test)]
 pub use in_memory::repository::{
-    InMemoryRepository,
-    mock_channel_repo,
-    mock_contact_repo,
-    mock_message_repo,
-    mock_repo
+    mock_channel_repo, mock_contact_repo, mock_message_repo, mock_repo, InMemoryRepository,
 };

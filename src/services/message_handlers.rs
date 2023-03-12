@@ -5,8 +5,8 @@ use crate::models::{Channel, ChannelType, Contact, Message};
 
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
-use std::fmt::{Display, Formatter};
 use crate::adapters::message_repository::MessageRepository;
+use std::fmt::{Display, Formatter};
 
 pub struct MessageService<'a> {
     repository: &'a mut dyn MessageRepository,
@@ -68,7 +68,11 @@ impl<'a> MessageService<'a> {
         &mut self,
         contact_ids: &Vec<IdType>,
     ) -> Result<Channel, MessageError> {
-        match self.channel_repository.get_by_contact_ids(contact_ids).await {
+        match self
+            .channel_repository
+            .get_by_contact_ids(contact_ids)
+            .await
+        {
             /// Returns channel if already exists
             Some(c) => Ok(c),
             /// Creates a new channel if it doesn't exist
@@ -107,20 +111,19 @@ impl Display for MessageError {
 
 #[cfg(test)]
 async fn add_test_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
-    let c1 = repo.create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+    let c1 = repo
+        .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
         .await
         .unwrap();
-    let c2 = repo.create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+    let c2 = repo
+        .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
         .await
         .unwrap();
     vec![c1, c2]
 }
 
 #[cfg(test)]
-async fn add_test_channel(
-    repo: &mut impl Repository<Channel>,
-    contacts: &Vec<Contact>,
-) -> Channel {
+async fn add_test_channel(repo: &mut impl Repository<Channel>, contacts: &Vec<Contact>) -> Channel {
     let cmd = commands::CreateChannel {
         name: "The North Remembers".to_string(),
         channel_type: ChannelType::Private,
@@ -131,16 +134,18 @@ async fn add_test_channel(
         cmd.channel_type.clone(),
         &cmd.contact_ids,
     ))
-        .await
-        .unwrap()
+    .await
+    .unwrap()
 }
 
 #[cfg(test)]
 mod tests {
-    use std::sync::mpsc::channel;
     use super::*;
-    use crate::adapters::{mock_channel_repo, mock_contact_repo, mock_message_repo, mock_repo, Model};
+    use crate::adapters::{
+        mock_channel_repo, mock_contact_repo, mock_message_repo, mock_repo, Model,
+    };
     use crate::models::{ChannelType, Contact};
+    use std::sync::mpsc::channel;
 
     #[actix_web::test]
     async fn can_send_message() {
@@ -151,8 +156,7 @@ mod tests {
         let contacts = add_test_contacts(&mut contact_repo).await;
         let _channel = add_test_channel(&mut channel_repo, &contacts).await;
 
-        let mut service =
-            MessageService::new(&mut repo, &mut channel_repo, &mut contact_repo);
+        let mut service = MessageService::new(&mut repo, &mut channel_repo, &mut contact_repo);
 
         let cmd = commands::SendMessage {
             channel_id: None,
@@ -177,9 +181,9 @@ mod tests {
 
 #[cfg(test)]
 mod tests_mongo {
+    use crate::adapters::channel_repository::ChannelRepository;
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::adapters::{Model, Repository};
-    use crate::adapters::channel_repository::ChannelRepository;
     use crate::commands;
     use crate::models::{Channel, ChannelType, Contact};
     use crate::services::message_handlers::{add_test_channel, add_test_contacts, MessageService};
@@ -216,8 +220,10 @@ mod tests_mongo {
         let contacts = add_test_contacts(&mut contacts_repo).await;
         let test_channel = add_test_channel(&mut repo, &contacts).await;
 
-        let channel = repo.get_by_contact_ids(&vec![contacts[0].id(), contacts[1].id()]).await.unwrap();
+        let channel = repo
+            .get_by_contact_ids(&vec![contacts[0].id(), contacts[1].id()])
+            .await
+            .unwrap();
         assert_eq!(channel.id(), test_channel.id());
     }
 }
-
