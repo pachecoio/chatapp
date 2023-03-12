@@ -2,7 +2,7 @@ use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::Repository;
 use crate::commands;
-use crate::models::{Channel, ChannelType, Contact};
+use crate::models::{Channel, ChannelType};
 
 pub struct ChannelService<'a> {
     repository: &'a mut dyn ChannelRepository,
@@ -64,24 +64,23 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 }
 
 #[cfg(test)]
-async fn add_mock_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
-    let jon = repo
-        .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
-        .await
-        .unwrap();
-    let arya = repo
-        .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
-        .await
-        .unwrap();
-    vec![jon, arya]
-}
-
-#[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_channel_repo, mock_contact_repo, Model};
+    use crate::adapters::{mock_channel_repo, mock_contact_repo, Model, Repository};
     use crate::commands;
-    use crate::models::{ChannelType};
-    use crate::services::channel_handlers::{add_mock_contacts, ChannelService};
+    use crate::models::{ChannelType, Contact};
+    use crate::services::channel_handlers::ChannelService;
+
+    pub async fn add_mock_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
+        let jon = repo
+            .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+            .await
+            .unwrap();
+        let arya = repo
+            .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+            .await
+            .unwrap();
+        vec![jon, arya]
+    }
 
     #[actix_web::test]
     async fn create_private_channel() {
@@ -139,8 +138,8 @@ mod tests {
 mod tests_mongo {
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::adapters::{Model, Repository};
-    
-    use crate::services::channel_handlers::add_mock_contacts;
+
+    use crate::services::channel_handlers::tests::add_mock_contacts;
     use crate::services::ChannelService;
 
     #[actix_web::test]

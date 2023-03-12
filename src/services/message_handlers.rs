@@ -141,11 +141,7 @@ async fn add_test_channel(repo: &mut impl Repository<Channel>, contacts: &Vec<Co
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::adapters::{
-        mock_channel_repo, mock_contact_repo, mock_message_repo, Model,
-    };
-    
-    
+    use crate::adapters::{mock_channel_repo, mock_contact_repo, mock_message_repo, Model};
 
     #[actix_web::test]
     async fn can_send_message() {
@@ -183,9 +179,9 @@ mod tests {
 mod tests_mongo {
     use crate::adapters::channel_repository::ChannelRepository;
     use crate::adapters::mongo::repository::MongoRepository;
-    use crate::adapters::{Model};
+    use crate::adapters::Model;
     use crate::commands;
-    
+
     use crate::services::message_handlers::{add_test_channel, add_test_contacts, MessageService};
 
     #[actix_web::test]
