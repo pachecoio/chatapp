@@ -88,7 +88,7 @@ mod tests {
         let cmd = commands::CreateChannel {
             name: "Private channel".to_string(),
             channel_type: ChannelType::Private,
-            contact_ids: contacts.iter().map(|c| c.id.clone()).collect(),
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
         };
         let res = service.create_channel(&cmd).await;
         assert!(res.is_ok());
@@ -117,7 +117,7 @@ mod tests {
         let cmd = commands::CreateChannel {
             name: "Group channel".to_string(),
             channel_type: ChannelType::Group,
-            contact_ids: contacts.iter().map(|c| c.id.clone()).collect(),
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
         };
         let res = service.create_channel(&cmd).await;
         assert!(res.is_ok());

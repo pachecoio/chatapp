@@ -7,22 +7,22 @@ use serde::{Deserialize, Serialize};
 pub struct Contact {
     #[serde(skip_serializing_if = "Option::is_none")]
     _id: Option<ObjectId>,
-    pub id: IdType,
     pub name: String,
     pub email: String,
 }
 
 impl Model for Contact {
-    fn id(&self) -> &IdType {
-        &self.id
+    fn id(&self) -> IdType {
+        IdType::ObjectId(self._id.clone().unwrap())
     }
 }
 
 impl Contact {
     pub fn new(name: &str, email: &str) -> Self {
         Contact {
-            _id: None,
-            id: IdType::String(uuid::Uuid::new_v4().to_string()),
+            _id: Some(
+                ObjectId::new()
+            ),
             name: name.to_string(),
             email: email.to_string(),
         }

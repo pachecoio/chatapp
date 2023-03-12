@@ -1,4 +1,4 @@
-use crate::adapters::{IdType, Repository};
+use crate::adapters::{IdType, Model, Repository};
 use crate::commands;
 
 use crate::models::{Channel, ChannelType, Contact, Message};
@@ -35,12 +35,12 @@ impl MessageService {
         let contact_to = self.get_contact(&cmd.to).await?;
         let channel = match &cmd.channel_id {
             None => {
-                self.create_private_channel(&vec![contact_from.id.clone(), contact_to.id.clone()])
+                self.create_private_channel(&vec![contact_from.id(), contact_to.id()])
                     .await?
             }
             Some(c) => self.get_channel(c).await?,
         };
-        let message = Message::new(&channel.id, &cmd.from, &cmd.to, &cmd.content);
+        let message = Message::new(&channel.id(), &cmd.from, &cmd.to, &cmd.content);
         match self.repository.create(&message).await {
             Ok(_) => Ok(()),
             Err(e) => Err(MessageError {
@@ -120,7 +120,7 @@ mod tests {
         let cmd = commands::CreateChannel {
             name: "The North Remembers".to_string(),
             channel_type: ChannelType::Private,
-            contact_ids: vec![contacts[0].id.clone(), contacts[1].id.clone()],
+            contact_ids: vec![contacts[0].id(), contacts[1].id()],
         };
         repo.create(&Channel::new(
             &cmd.name,
@@ -140,8 +140,8 @@ mod tests {
 
         let cmd = commands::SendMessage {
             channel_id: None,
-            from: contacts[0].id.clone(),
-            to: contacts[1].id.clone(),
+            from: contacts[0].id(),
+            to: contacts[1].id(),
             content: "The north remembers!".to_string(),
         };
         let res = service.send_message(&cmd).await;

@@ -79,7 +79,7 @@ mod tests {
         let mut service = ContactService::new(&mut repo);
         let _res = _create_contact(&mut service).await;
         let contacts = service.repository.list().await.unwrap();
-        let id = contacts.first().unwrap().id.clone();
+        let id = contacts.first().unwrap().id();
 
         let contact = service.repository.get(&id).await;
         assert!(contact.is_some());
@@ -103,7 +103,7 @@ mod tests {
         let mut service = ContactService::new(&mut repo);
         let _res = _create_contact(&mut service).await;
         let contacts = service.repository.list().await.unwrap();
-        let id = contacts.first().unwrap().id.clone();
+        let id = contacts.first().unwrap().id();
 
         let res = service.repository.delete(&id).await;
         assert!(res.is_ok());
@@ -114,6 +114,7 @@ mod tests {
 
 #[cfg(test)]
 mod tests_mongo {
+    use crate::adapters::Model;
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::commands;
     use crate::services::ContactService;
@@ -131,5 +132,21 @@ mod tests_mongo {
         assert_eq!(res.is_ok(), true);
         let contacts = service.repository.list().await.unwrap();
         assert!(!contacts.is_empty());
+
+        let id = res.unwrap().id();
+        let contact = service.repository.get(&id).await;
+        assert!(contact.is_some());
+
+        let mut contact = contact.unwrap();
+        contact.name = "Arya Stark".to_string();
+
+        let updated = service.repository.update(&contact).await;
+        assert!(updated.is_ok());
+
+        let contact = service.repository.get(&id).await.unwrap();
+        assert_eq!(contact.name, "Arya Stark");
+
+        let deleted = service.repository.delete(&id).await;
+        assert!(deleted.is_ok());
     }
 }

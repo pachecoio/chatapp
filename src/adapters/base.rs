@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
 
 pub trait Model: Clone + Debug + Send + Sync + Serialize + DeserializeOwned {
-    fn id(&self) -> &IdType;
+    fn id(&self) -> IdType;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]

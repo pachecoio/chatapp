@@ -16,7 +16,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
     }
 
     async fn update(&mut self, entity: &M) -> Result<(), RepositoryError> {
-        let contact = match self.get(entity.id()).await {
+        let contact = match self.get(&entity.id()).await {
             Some(c) => c,
             None => {
                 return Err(RepositoryError {

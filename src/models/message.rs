@@ -17,8 +17,8 @@ pub struct Message {
 }
 
 impl Model for Message {
-    fn id(&self) -> &IdType {
-        &self.id
+    fn id(&self) -> IdType {
+        self.id.clone()
     }
 }
 
