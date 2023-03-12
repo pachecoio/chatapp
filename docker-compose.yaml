@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  database:
+    image: mongo
+    restart: always
+    container_name: messaging_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - messaging_db_v:/data/db
+    networks:
+      - messaging_network
+
+volumes:
+  messaging_db_v:
+    name: messaging_db_v
+
+networks:
+  messaging_network:
+    name: messaging_network

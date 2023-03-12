@@ -1,14 +1,18 @@
 mod base;
-mod channel_repository;
-mod contact_repository;
+pub use base::{IdType, Model, Repository, RepositoryError};
 
-pub use base::Entity;
-pub use base::Repository;
-
-pub use base::mock_repo;
-pub use channel_repository::ChannelRepository;
-pub use contact_repository::ContactRepository;
+pub mod channel_repository;
+pub mod contact_repository;
+pub mod mongo;
 
 #[cfg(test)]
-pub use channel_repository::mock_channel_repo;
-pub use contact_repository::mock_contact_repo;
+mod in_memory;
+
+#[cfg(test)]
+pub use in_memory::repository::mock_channel_repo;
+#[cfg(test)]
+pub use in_memory::repository::mock_contact_repo;
+#[cfg(test)]
+pub use in_memory::repository::mock_repo;
+#[cfg(test)]
+pub use in_memory::repository::InMemoryRepository;

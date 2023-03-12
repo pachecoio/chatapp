@@ -24,9 +24,11 @@ impl ChannelService {
     ) -> Result<Channel, ChannelError> {
         validate_channel(cmd)?;
         let channel = Channel::new(&cmd.name, cmd.channel_type.clone(), &cmd.contact_ids);
-        match self.repository.create(&channel) {
+        match self.repository.create(&channel).await {
             Ok(c) => Ok(c),
-            Err(e) => Err(ChannelError { message: e }),
+            Err(e) => Err(ChannelError {
+                message: e.to_string(),
+            }),
         }
     }
 }
@@ -60,19 +62,21 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{mock_repo, Entity, Repository};
+    use crate::adapters::{mock_repo, Model, Repository};
     use crate::commands;
-    use crate::models::{Channel, ChannelType, Contact};
+    use crate::models::{ChannelType, Contact};
     use crate::services::channel_handlers::ChannelService;
 
     /// Creates a mock repository with two contacts
-    async fn mock_repo_with_contacts<E: Entity>() -> (impl Repository<Contact>, Vec<Contact>) {
+    async fn mock_repo_with_contacts<M: Model>() -> (impl Repository<Contact>, Vec<Contact>) {
         let mut contact_repo = mock_repo();
         let jon = contact_repo
             .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+            .await
             .unwrap();
         let arya = contact_repo
             .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+            .await
             .unwrap();
         (contact_repo, vec![jon, arya])
     }
@@ -84,7 +88,7 @@ mod tests {
         let cmd = commands::CreateChannel {
             name: "Private channel".to_string(),
             channel_type: ChannelType::Private,
-            contact_ids: contacts.iter().map(|c| c.id.clone()).collect(),
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
         };
         let res = service.create_channel(&cmd).await;
         assert!(res.is_ok());
@@ -113,7 +117,7 @@ mod tests {
         let cmd = commands::CreateChannel {
             name: "Group channel".to_string(),
             channel_type: ChannelType::Group,
-            contact_ids: contacts.iter().map(|c| c.id.clone()).collect(),
+            contact_ids: contacts.iter().map(|c| c.id()).collect(),
         };
         let res = service.create_channel(&cmd).await;
         assert!(res.is_ok());

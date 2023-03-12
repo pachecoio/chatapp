@@ -1,5 +1,5 @@
 use actix::{Actor, StreamHandler};
-use actix_web::http::Error;
+
 use actix_web::{web, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 
@@ -26,6 +26,6 @@ pub async fn index(
     stream: web::Payload,
 ) -> Result<HttpResponse, actix_web::Error> {
     let resp = ws::start(WebSocket {}, &req, stream);
-    println!("{:?}", resp);
+    println!("{resp:?}");
     resp
 }
