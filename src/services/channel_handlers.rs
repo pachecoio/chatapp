@@ -34,7 +34,10 @@ impl<'a> ChannelService<'a> {
         }
     }
 
-    pub async fn find_contact_channels(&mut self, contact_id: &IdType) -> Result<Vec<Channel>, ChannelError> {
+    pub async fn find_contact_channels(
+        &mut self,
+        contact_id: &IdType,
+    ) -> Result<Vec<Channel>, ChannelError> {
         match self.repository.find_by_contact_id(contact_id).await {
             Ok(c) => Ok(c),
             Err(e) => Err(ChannelError {
@@ -42,7 +45,6 @@ impl<'a> ChannelService<'a> {
             }),
         }
     }
-
 }
 
 #[derive(Debug)]
@@ -238,7 +240,7 @@ mod tests_mongo {
             contact_ids: contacts.iter().map(|c| c.id()).collect(),
         };
         let res = service.create_channel(&cmd).await;
-        assert!(res.is_ok());;
+        assert!(res.is_ok());
 
         let channel = res.unwrap();
         assert_eq!(channel.contact_ids.len(), 2);
