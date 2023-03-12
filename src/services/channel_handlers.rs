@@ -10,16 +10,6 @@ pub struct ChannelService<'a> {
 }
 
 impl<'a> ChannelService<'a> {
-    // pub fn new<R: Repository<Channel> + 'static, C: Repository<Contact> + 'static>(
-    //     repository: R,
-    //     contact_repository: C,
-    // ) -> Self {
-    //     ChannelService {
-    //         repository: Box::new(repository),
-    //         contact_repository: Box::new(contact_repository),
-    //     }
-    // }
-
     fn new(
         repo: &'a mut dyn ChannelRepository,
         contact_repository: &'a mut dyn ContactRepository,
