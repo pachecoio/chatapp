@@ -55,7 +55,7 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
     async fn get(&self, _id: &IdType) -> Option<M> {
         for entity in self.entities.iter() {
             let id = entity.id();
-            if id == id {
+            if &id == _id {
                 return Some(entity.clone());
             }
         }

@@ -123,7 +123,7 @@ async fn add_test_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> 
 }
 
 #[cfg(test)]
-async fn add_test_channel(repo: &mut impl Repository<Channel>, contacts: &Vec<Contact>) -> Channel {
+async fn add_test_channel(repo: &mut impl Repository<Channel>, contacts: &[Contact]) -> Channel {
     let cmd = commands::CreateChannel {
         name: "The North Remembers".to_string(),
         channel_type: ChannelType::Private,

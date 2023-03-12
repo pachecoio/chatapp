@@ -129,7 +129,7 @@ mod tests_mongo {
             email: "jon@winterfell.com".to_string(),
         };
         let res = service.create_contact(&cmd).await;
-        assert_eq!(res.is_ok(), true);
+        assert!(res.is_ok());
         let contacts = service.repository.list().await.unwrap();
         assert!(!contacts.is_empty());
 
