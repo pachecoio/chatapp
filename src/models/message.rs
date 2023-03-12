@@ -2,8 +2,8 @@ use crate::adapters::{IdType, Model};
 use chrono::serde::ts_seconds;
 use chrono::{DateTime, Utc};
 use mongodb::bson::oid::ObjectId;
-use serde::ser::SerializeStruct;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message {
@@ -23,7 +23,7 @@ pub struct Message {
 
 impl Model for Message {
     fn id(&self) -> IdType {
-        IdType::ObjectId(self.id.clone().unwrap())
+        IdType::ObjectId(self.id.unwrap())
     }
 }
 

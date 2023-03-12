@@ -1,7 +1,7 @@
 use crate::adapters::{IdType, Model};
 use chrono::serde::ts_seconds;
 use chrono::{DateTime, Utc};
-use mongodb::bson;
+
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +19,7 @@ pub struct Contact {
 
 impl Model for Contact {
     fn id(&self) -> IdType {
-        IdType::ObjectId(self.id.clone().unwrap())
+        IdType::ObjectId(self.id.unwrap())
     }
 }
 

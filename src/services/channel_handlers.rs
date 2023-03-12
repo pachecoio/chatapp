@@ -2,7 +2,7 @@ use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::Repository;
 use crate::commands;
-use crate::models::{Channel, ChannelType, Contact};
+use crate::models::{Channel, ChannelType};
 
 pub struct ChannelService<'a> {
     repository: &'a mut dyn ChannelRepository,
@@ -75,10 +75,10 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 #[cfg(test)]
 mod tests {
     use crate::adapters::{
-        mock_channel_repo, mock_contact_repo, mock_repo, InMemoryRepository, Model, Repository,
+        mock_channel_repo, mock_contact_repo, mock_repo, Model, Repository,
     };
     use crate::commands;
-    use crate::models::{Channel, ChannelType, Contact};
+    use crate::models::{ChannelType, Contact};
     use crate::services::channel_handlers::ChannelService;
 
     /// Creates a mock repository with two contacts
@@ -198,7 +198,7 @@ mod tests_mongo {
         assert_eq!(channel.contact_ids.len(), 2);
 
         let channels = service.repository.list().await.unwrap();
-        assert!(channels.len() > 0);
+        assert!(!channels.is_empty());
 
         channel.name = Some("Updated channel".to_string());
 

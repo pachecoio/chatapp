@@ -20,7 +20,7 @@ pub struct Channel {
 
 impl Model for Channel {
     fn id(&self) -> IdType {
-        IdType::ObjectId(self.id.clone().unwrap())
+        IdType::ObjectId(self.id.unwrap())
     }
 }
 

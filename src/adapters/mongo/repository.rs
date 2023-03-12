@@ -70,10 +70,7 @@ where
                     .find_one(Some(doc! { "id": s }), None)
                     .await
                     .unwrap();
-                match result {
-                    Some(m) => Some(m),
-                    None => None,
-                }
+                result
             }
             IdType::ObjectId(o) => {
                 let result = self
@@ -81,10 +78,7 @@ where
                     .find_one(Some(doc! { "_id": o }), None)
                     .await
                     .unwrap();
-                match result {
-                    Some(m) => Some(m),
-                    None => None,
-                }
+                result
             }
         }
     }
@@ -104,7 +98,7 @@ where
 impl ContactRepository for MongoRepository<Contact> {}
 
 impl ChannelRepository for MongoRepository<Channel> {
-    fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
+    fn get_by_contact_ids(&self, _contact_ids: &Vec<IdType>) -> Option<Channel> {
         todo!()
     }
 }
