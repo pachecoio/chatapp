@@ -2,7 +2,7 @@ use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::Repository;
 use crate::commands;
-use crate::models::{Channel, ChannelType};
+use crate::models::{Channel, ChannelType, Contact};
 
 pub struct ChannelService<'a> {
     repository: &'a mut dyn ChannelRepository,
@@ -62,6 +62,7 @@ fn validate_channel(cmd: &commands::CreateChannel) -> Result<(), ChannelError> {
         _ => Ok(()),
     }
 }
+
 fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), ChannelError> {
     if cmd.contact_ids.len() != 2 {
         Err(ChannelError {
@@ -73,39 +74,26 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 }
 
 #[cfg(test)]
+async fn add_mock_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
+    let jon = repo
+        .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+        .await
+        .unwrap();
+    let arya = repo
+        .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+        .await
+        .unwrap();
+    vec![jon, arya]
+}
+
+#[cfg(test)]
 mod tests {
     use crate::adapters::{
         mock_channel_repo, mock_contact_repo, mock_repo, Model, Repository,
     };
     use crate::commands;
     use crate::models::{ChannelType, Contact};
-    use crate::services::channel_handlers::ChannelService;
-
-    /// Creates a mock repository with two contacts
-    async fn mock_repo_with_contacts<M: Model>() -> (impl Repository<Contact>, Vec<Contact>) {
-        let mut contact_repo = mock_repo();
-        let jon = contact_repo
-            .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
-            .await
-            .unwrap();
-        let arya = contact_repo
-            .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
-            .await
-            .unwrap();
-        (contact_repo, vec![jon, arya])
-    }
-
-    async fn add_mock_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
-        let jon = repo
-            .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
-            .await
-            .unwrap();
-        let arya = repo
-            .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
-            .await
-            .unwrap();
-        vec![jon, arya]
-    }
+    use crate::services::channel_handlers::{add_mock_contacts, ChannelService};
 
     #[actix_web::test]
     async fn create_private_channel() {
@@ -164,19 +152,8 @@ mod tests_mongo {
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::adapters::{Model, Repository};
     use crate::models::Contact;
+    use crate::services::channel_handlers::add_mock_contacts;
     use crate::services::ChannelService;
-
-    async fn add_mock_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
-        let jon = repo
-            .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
-            .await
-            .unwrap();
-        let arya = repo
-            .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
-            .await
-            .unwrap();
-        vec![jon, arya]
-    }
 
     #[actix_web::test]
     async fn create_channel() {
