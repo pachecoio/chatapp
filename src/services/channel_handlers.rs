@@ -20,7 +20,10 @@ impl<'a> ChannelService<'a> {
     //     }
     // }
 
-    fn new(repo: &'a mut dyn ChannelRepository, contact_repository: &'a mut dyn ContactRepository) -> Self {
+    fn new(
+        repo: &'a mut dyn ChannelRepository,
+        contact_repository: &'a mut dyn ContactRepository,
+    ) -> Self {
         ChannelService {
             repository: repo,
             contact_repository,
@@ -71,7 +74,9 @@ fn validate_private_channel(cmd: &commands::CreateChannel) -> Result<(), Channel
 
 #[cfg(test)]
 mod tests {
-    use crate::adapters::{InMemoryRepository, mock_channel_repo, mock_contact_repo, mock_repo, Model, Repository};
+    use crate::adapters::{
+        mock_channel_repo, mock_contact_repo, mock_repo, InMemoryRepository, Model, Repository,
+    };
     use crate::commands;
     use crate::models::{Channel, ChannelType, Contact};
     use crate::services::channel_handlers::ChannelService;
@@ -107,10 +112,7 @@ mod tests {
         let mut repo = mock_channel_repo();
         let mut c_repo = mock_contact_repo();
         let contacts = add_mock_contacts(&mut c_repo).await;
-        let mut service = ChannelService::new(
-            &mut repo,
-            &mut c_repo,
-        );
+        let mut service = ChannelService::new(&mut repo, &mut c_repo);
         let cmd = commands::CreateChannel {
             name: "Private channel".to_string(),
             channel_type: ChannelType::Private,
@@ -126,10 +128,7 @@ mod tests {
     async fn cannot_create_private_channel_with_less_than_two_contacts() {
         let mut repo = mock_channel_repo();
         let mut c_repo = mock_contact_repo();
-        let mut service = ChannelService::new(
-            &mut repo,
-            &mut c_repo,
-        );
+        let mut service = ChannelService::new(&mut repo, &mut c_repo);
         let cmd = commands::CreateChannel {
             name: "Private channel without contacts".to_string(),
             channel_type: ChannelType::Private,
@@ -146,10 +145,7 @@ mod tests {
         let mut repo = mock_channel_repo();
         let mut c_repo = mock_contact_repo();
         let contacts = add_mock_contacts(&mut c_repo).await;
-        let mut service = ChannelService::new(
-            &mut repo,
-            &mut c_repo,
-        );
+        let mut service = ChannelService::new(&mut repo, &mut c_repo);
         let cmd = commands::CreateChannel {
             name: "Group channel".to_string(),
             channel_type: ChannelType::Group,

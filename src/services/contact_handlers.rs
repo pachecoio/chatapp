@@ -114,8 +114,8 @@ mod tests {
 
 #[cfg(test)]
 mod tests_mongo {
-    use crate::adapters::Model;
     use crate::adapters::mongo::repository::MongoRepository;
+    use crate::adapters::Model;
     use crate::commands;
     use crate::services::ContactService;
 

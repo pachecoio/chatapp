@@ -1,3 +1,4 @@
+use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact};
@@ -5,7 +6,6 @@ use async_trait::async_trait;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 use serde::de::DeserializeOwned;
-use crate::adapters::channel_repository::ChannelRepository;
 
 pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,
@@ -39,10 +39,7 @@ where
             IdType::String(s) => doc! { "id": s },
             IdType::ObjectId(o) => doc! { "_id": o },
         };
-        let result = self
-            .collection
-            .replace_one(doc, model, None)
-            .await;
+        let result = self.collection.replace_one(doc, model, None).await;
         match result {
             Ok(_) => Ok(()),
             Err(e) => Err(RepositoryError {
