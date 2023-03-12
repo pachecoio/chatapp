@@ -1,11 +1,13 @@
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
-use crate::models::{Channel, Contact};
+use crate::models::{Channel, Contact, Message};
 use async_trait::async_trait;
 use futures::TryStreamExt;
-use mongodb::bson::doc;
+use mongodb::bson::{doc, Document};
+use mongodb::bson::oid::ObjectId;
 use serde::de::DeserializeOwned;
+use crate::adapters::message_repository::MessageRepository;
 
 pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,
@@ -97,8 +99,60 @@ where
 
 impl ContactRepository for MongoRepository<Contact> {}
 
+#[async_trait]
 impl ChannelRepository for MongoRepository<Channel> {
-    fn get_by_contact_ids(&self, _contact_ids: &Vec<IdType>) -> Option<Channel> {
-        todo!()
+    async fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
+        let ids = contact_ids.iter().map(|id| {
+            match id {
+                IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
+                IdType::ObjectId(o) => o.clone(),
+            }
+        }).map(|id|
+            doc! {
+                "ObjectId": id
+            }
+        ).collect::<Vec<Document>>();
+
+        self.collection
+            .find_one(
+                Some(doc! {
+                    "contact_ids": {
+                        "$all": ids
+                        }
+                }),
+                None,
+            )
+            .await
+            .unwrap()
+    }
+}
+
+#[async_trait]
+impl MessageRepository for MongoRepository<Message> {
+    async fn get_by_channel_id(&self, channel_id: &IdType, limit: i64, offset: u64) -> Result<Vec<Message>, RepositoryError> {
+        let object_id = match channel_id {
+            IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
+            IdType::ObjectId(o) => o.clone(),
+        };
+        let options = mongodb::options::FindOptions::builder()
+            .limit(Some(limit))
+            .skip(Some(offset))
+            .sort(Some(doc! { "created_at": -1 }))
+            .build();
+
+        let mut cursor = self
+            .collection
+            .find(Some(doc! {
+                "channel_id": {
+                    "ObjectId": object_id
+                },
+            }), options)
+            .await
+            .unwrap();
+        let mut messages = Vec::new();
+        while let Some(result) = cursor.try_next().await.unwrap() {
+            messages.push(result);
+        }
+        Ok(messages)
     }
 }

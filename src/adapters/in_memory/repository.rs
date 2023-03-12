@@ -1,8 +1,9 @@
 use crate::adapters::channel_repository::ChannelRepository;
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
-use crate::models::{Channel, Contact};
+use crate::models::{Channel, Contact, Message};
 use async_trait::async_trait;
+use crate::adapters::message_repository::MessageRepository;
 
 pub struct InMemoryRepository<M> {
     pub entities: Vec<M>,
@@ -65,8 +66,9 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
     }
 }
 
+#[async_trait]
 impl ChannelRepository for InMemoryRepository<Channel> {
-    fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
+    async fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
         for channel in self.entities.iter() {
             if channel.contact_ids.clone().sort() == contact_ids.clone().sort() {
                 return Some(channel.clone());
@@ -77,6 +79,23 @@ impl ChannelRepository for InMemoryRepository<Channel> {
 }
 
 impl ContactRepository for InMemoryRepository<Contact> {}
+
+#[async_trait]
+impl MessageRepository for InMemoryRepository<Message> {
+    async fn get_by_channel_id(&self, channel_id: &IdType, limit: i64, offset: u64) -> Result<Vec<Message>, RepositoryError> {
+        let mut messages = Vec::new();
+        for message in self.entities.iter() {
+            if message.channel_id == *channel_id {
+                messages.push(message.clone());
+            }
+        }
+        Ok(messages)
+    }
+}
+
+pub fn mock_message_repo() -> InMemoryRepository<Message> {
+    InMemoryRepository { entities: vec![] }
+}
 
 pub fn mock_channel_repo() -> InMemoryRepository<Channel> {
     InMemoryRepository { entities: vec![] }
