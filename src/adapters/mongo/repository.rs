@@ -1,10 +1,11 @@
 use crate::adapters::contact_repository::ContactRepository;
 use crate::adapters::{IdType, Model, Repository, RepositoryError};
-use crate::models::Contact;
+use crate::models::{Channel, Contact};
 use async_trait::async_trait;
 use futures::TryStreamExt;
 use mongodb::bson::doc;
 use serde::de::DeserializeOwned;
+use crate::adapters::channel_repository::ChannelRepository;
 
 pub struct MongoRepository<M> {
     pub collection: mongodb::Collection<M>,
@@ -104,3 +105,9 @@ where
 }
 
 impl ContactRepository for MongoRepository<Contact> {}
+
+impl ChannelRepository for MongoRepository<Channel> {
+    fn get_by_contact_ids(&self, contact_ids: &Vec<IdType>) -> Option<Channel> {
+        todo!()
+    }
+}
