@@ -85,8 +85,8 @@ impl MessageRepository for InMemoryRepository<Message> {
     async fn get_by_channel_id(
         &self,
         channel_id: &IdType,
-        limit: i64,
-        offset: u64,
+        _limit: i64,
+        _offset: u64,
     ) -> Result<Vec<Message>, RepositoryError> {
         let mut messages = Vec::new();
         for message in self.entities.iter() {

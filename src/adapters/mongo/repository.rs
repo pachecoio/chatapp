@@ -5,7 +5,7 @@ use crate::adapters::{IdType, Model, Repository, RepositoryError};
 use crate::models::{Channel, Contact, Message};
 use async_trait::async_trait;
 use futures::TryStreamExt;
-use mongodb::bson::oid::ObjectId;
+
 use mongodb::bson::{doc, Document};
 use serde::de::DeserializeOwned;
 
@@ -106,7 +106,7 @@ impl ChannelRepository for MongoRepository<Channel> {
             .iter()
             .map(|id| match id {
                 IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
-                IdType::ObjectId(o) => o.clone(),
+                IdType::ObjectId(o) => *o,
             })
             .map(|id| {
                 doc! {
@@ -139,7 +139,7 @@ impl MessageRepository for MongoRepository<Message> {
     ) -> Result<Vec<Message>, RepositoryError> {
         let object_id = match channel_id {
             IdType::String(s) => mongodb::bson::oid::ObjectId::parse_str(s).unwrap(),
-            IdType::ObjectId(o) => o.clone(),
+            IdType::ObjectId(o) => *o,
         };
         let options = mongodb::options::FindOptions::builder()
             .limit(Some(limit))

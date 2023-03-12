@@ -1,5 +1,5 @@
 use crate::adapters::{IdType, Repository, RepositoryError};
-use crate::models::{Channel, Message};
+use crate::models::{Message};
 use async_trait::async_trait;
 
 #[async_trait]
