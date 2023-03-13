@@ -91,7 +91,17 @@ impl ChannelRepository for InMemoryRepository<Channel> {
     }
 }
 
-impl ContactRepository for InMemoryRepository<Contact> {}
+#[async_trait]
+impl ContactRepository for InMemoryRepository<Contact> {
+    async fn find_by_email(&self, email: &str) -> Option<Contact> {
+        for contact in self.entities.iter() {
+            if contact.email == email {
+                return Some(contact.clone());
+            }
+        }
+        None
+    }
+}
 
 #[async_trait]
 impl MessageRepository for InMemoryRepository<Message> {

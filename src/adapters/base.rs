@@ -33,7 +33,7 @@ pub trait Repository<M: Model> {
     async fn list(&self) -> Result<Vec<M>, RepositoryError>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RepositoryError {
     pub message: String,
 }

@@ -112,11 +112,11 @@ impl Display for MessageError {
 #[cfg(test)]
 async fn add_test_contacts(repo: &mut impl Repository<Contact>) -> Vec<Contact> {
     let c1 = repo
-        .create(&Contact::new("Jon Snow", "jon@winterfell.com"))
+        .create(&Contact::new("Sansa Stark", "sansa@winterfell.com"))
         .await
         .unwrap();
     let c2 = repo
-        .create(&Contact::new("Arya Stark", "arya@winterfell.com"))
+        .create(&Contact::new("Eddard Stark", "eddard@winterfell.com"))
         .await
         .unwrap();
     vec![c1, c2]
@@ -177,9 +177,10 @@ mod tests {
 
 #[cfg(test)]
 mod tests_mongo {
+    use mongodb::bson::doc;
     use crate::adapters::channel_repository::ChannelRepository;
     use crate::adapters::mongo::repository::MongoRepository;
-    use crate::adapters::Model;
+    use crate::adapters::{Model, Repository};
     use crate::commands;
 
     use crate::services::message_handlers::{add_test_channel, add_test_contacts, MessageService};
@@ -206,6 +207,15 @@ mod tests_mongo {
 
         let messages = service.get_messages(&channel.id()).await.unwrap();
         assert!(!messages.is_empty(), "Should have created a new message");
+
+        // cleanup
+        for c in contacts {
+            contacts_repo.delete(&c.id()).await.unwrap();
+        }
+        channels_repo.delete(&channel.id()).await.unwrap();
+        for m in messages {
+            repo.delete(&m.id()).await.unwrap();
+        }
     }
 
     #[actix_web::test]
@@ -221,5 +231,11 @@ mod tests_mongo {
             .await
             .unwrap();
         assert_eq!(channel.id(), test_channel.id());
+
+        // cleanup
+        for c in contacts {
+            contacts_repo.delete(&c.id()).await.unwrap();
+        }
+        repo.delete(&test_channel.id()).await.unwrap();
     }
 }

@@ -21,8 +21,15 @@ impl<'a> ContactService<'a> {
         cmd: &commands::CreateContact,
     ) -> Result<Contact, RepositoryError> {
         let contact = Contact::new(&cmd.name, &cmd.email);
+        match self.repository.find_by_email(&contact.email).await {
+            Some(_) => {
+                return Err(RepositoryError {
+                    message: format!("Contact with email {} already exists", contact.email)
+                })
+            }
+            None => (),
+        }
         self.repository.create(&contact).await?;
-
         Ok(contact)
     }
 
@@ -125,11 +132,16 @@ mod tests_mongo {
         let mut repo = MongoRepository::new(&db, "contacts");
         let mut service = ContactService::new(&mut repo);
         let cmd = commands::CreateContact {
-            name: "Jon Snow".to_string(),
-            email: "jon@winterfell.com".to_string(),
+            name: "Samwell Tarly".to_string(),
+            email: "samwell@thewall.com".to_string(),
         };
         let res = service.create_contact(&cmd).await;
         assert!(res.is_ok());
+
+        // Cannot create duplicated contact
+        let res_err = service.create_contact(&cmd).await;
+        assert!(res_err.is_err());
+
         let contacts = service.repository.list().await.unwrap();
         assert!(!contacts.is_empty());
 

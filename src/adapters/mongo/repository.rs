@@ -97,7 +97,17 @@ where
     }
 }
 
-impl ContactRepository for MongoRepository<Contact> {}
+#[async_trait]
+impl ContactRepository for MongoRepository<Contact> {
+    async fn find_by_email(&self, email: &str) -> Option<Contact> {
+        let result = self
+            .collection
+            .find_one(Some(doc! { "email": email }), None)
+            .await
+            .unwrap();
+        result
+    }
+}
 
 #[async_trait]
 impl ChannelRepository for MongoRepository<Channel> {

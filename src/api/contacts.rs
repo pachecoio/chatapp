@@ -21,6 +21,10 @@ pub async fn create_contact(data: web::Data<AppState>, contact: web::Json<Create
     let res = service.create_contact(&contact).await;
     match res {
         Ok(contact) => Ok(HttpResponse::Ok().json(contact)),
-        Err(e) => Ok(HttpResponse::InternalServerError().body(e.to_string())),
+        Err(e) => Ok(
+            HttpResponse::BadRequest()
+                .content_type("application/json")
+                .json(e)
+        ),
     }
 }
