@@ -8,15 +8,15 @@ pub struct ContactService<'a> {
 }
 
 impl<'a> ContactService<'a> {
-    fn new(repo: &'a mut dyn ContactRepository) -> Self {
+    pub(crate) fn new(repo: &'a mut dyn ContactRepository) -> Self {
         ContactService { repository: repo }
     }
 
-    async fn list(&self) -> Result<Vec<Contact>, RepositoryError> {
+    pub(crate) async fn list(&self) -> Result<Vec<Contact>, RepositoryError> {
         self.repository.list().await
     }
 
-    async fn create_contact(
+    pub(crate) async fn create_contact(
         &mut self,
         cmd: &commands::CreateContact,
     ) -> Result<Contact, RepositoryError> {

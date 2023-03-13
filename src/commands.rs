@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use crate::adapters::IdType;
 use crate::models::ChannelType;
 
@@ -8,6 +9,7 @@ pub struct SendMessage {
     pub content: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateContact {
     pub name: String,
     pub email: String,

@@ -7,19 +7,20 @@ mod websocket;
 
 use actix_web::{web, App, HttpServer};
 
-struct AppState {
+pub struct AppState {
     db: mongodb::Database,
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // let db = adapters::mongo::database::init("chatapp").await;
+    let db = adapters::mongo::database::init("chatapp").await;
     HttpServer::new(move || {
         App::new()
-            // .app_data(web::Data::new(AppState {
-            //     db: db.to_owned(),
-            // }))
+            .app_data(web::Data::new(AppState {
+                db: db.to_owned(),
+            }))
             .service(api::contacts::get_contacts)
+            .service(api::contacts::create_contact)
             .route("/ws/", web::get().to(websocket::index))
     })
     .bind(("127.0.0.1", 8080))?
