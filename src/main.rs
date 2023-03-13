@@ -17,8 +17,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(AppState { db: db.to_owned() }))
-            .service(api::contacts::get_contacts)
-            .service(api::contacts::create_contact)
+            .service(api::contacts::get_scope())
             .route("/ws/", web::get().to(websocket::index))
     })
     .bind(("127.0.0.1", 8080))?
