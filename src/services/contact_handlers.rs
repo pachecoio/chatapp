@@ -127,6 +127,7 @@ mod tests_mongo {
     use crate::services::ContactService;
 
     #[actix_web::test]
+    #[ignore]
     async fn can_create_contact() {
         let db = crate::adapters::mongo::database::init("test").await;
         let mut repo = MongoRepository::new(&db, "contacts");

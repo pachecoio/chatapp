@@ -188,11 +188,11 @@ mod tests_mongo {
     use crate::adapters::{Model, Repository};
     use crate::commands;
     use crate::models::ChannelType;
-
     use crate::services::channel_handlers::tests::add_mock_contacts;
     use crate::services::ChannelService;
 
     #[actix_web::test]
+    #[ignore]
     async fn create_channel() {
         let db = crate::adapters::mongo::database::init("test").await;
         let mut repo = MongoRepository::new(&db, "channels");
@@ -227,6 +227,7 @@ mod tests_mongo {
     }
 
     #[actix_web::test]
+    #[ignore]
     async fn find_contact_channels() {
         let db = crate::adapters::mongo::database::init("test").await;
         let mut repo = MongoRepository::new(&db, "channels");

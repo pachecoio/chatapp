@@ -181,11 +181,10 @@ mod tests_mongo {
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::adapters::{Model, Repository};
     use crate::commands;
-    
-
     use crate::services::message_handlers::{add_test_channel, add_test_contacts, MessageService};
 
     #[actix_web::test]
+    #[ignore]
     async fn can_send_message() {
         let db = crate::adapters::mongo::database::init("test").await;
         let mut repo = MongoRepository::new(&db, "messages");
@@ -219,6 +218,7 @@ mod tests_mongo {
     }
 
     #[actix_web::test]
+    #[ignore]
     async fn find_by_contact_ids() {
         let db = crate::adapters::mongo::database::init("test").await;
         let mut repo = MongoRepository::new(&db, "channels");
