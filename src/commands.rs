@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
 use crate::adapters::IdType;
 use crate::models::ChannelType;
+use serde::{Deserialize, Serialize};
 
 pub struct SendMessage {
     pub channel_id: Option<IdType>,

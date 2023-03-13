@@ -24,7 +24,7 @@ impl<'a> ContactService<'a> {
         match self.repository.find_by_email(&contact.email).await {
             Some(_) => {
                 return Err(RepositoryError {
-                    message: format!("Contact with email {} already exists", contact.email)
+                    message: format!("Contact with email {} already exists", contact.email),
                 })
             }
             None => (),
