@@ -181,7 +181,7 @@ mod tests_mongo {
     use crate::adapters::mongo::repository::MongoRepository;
     use crate::adapters::{Model, Repository};
     use crate::commands;
-    use mongodb::bson::doc;
+    
 
     use crate::services::message_handlers::{add_test_channel, add_test_contacts, MessageService};
 
