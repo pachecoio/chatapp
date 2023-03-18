@@ -65,24 +65,21 @@ where
     }
 
     async fn get(&self, _id: &IdType) -> Option<M> {
-        match _id {
+        let object_id = match _id {
             IdType::String(s) => {
-                let result = self
-                    .collection
-                    .find_one(Some(doc! { "id": s }), None)
-                    .await
-                    .unwrap();
-                result
+                let object_id = match mongodb::bson::oid::ObjectId::parse_str(s) {
+                    Ok(o) => o,
+                    Err(_) => return None,
+                };
+                object_id
             }
-            IdType::ObjectId(o) => {
-                let result = self
-                    .collection
-                    .find_one(Some(doc! { "_id": o }), None)
-                    .await
-                    .unwrap();
-                result
-            }
-        }
+            IdType::ObjectId(o) => o.clone(),
+        };
+
+        self.collection
+            .find_one(Some(doc! { "_id": object_id }), None)
+            .await
+            .unwrap()
     }
 
     async fn list(&self, skip: Option<u64>, limit: Option<i32>) -> Result<(i32, Vec<M>), RepositoryError> {

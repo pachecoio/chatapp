@@ -1,5 +1,5 @@
 use crate::adapters::contact_repository::ContactRepository;
-use crate::adapters::{Repository, RepositoryError};
+use crate::adapters::{IdType, Repository, RepositoryError};
 use crate::commands;
 use crate::models::Contact;
 
@@ -14,6 +14,11 @@ impl<'a> ContactService<'a> {
 
     pub async fn list(&self, skip: Option<u64>, limit: Option<i32>) -> Result<(i32, Vec<Contact>), RepositoryError> {
         self.repository.list(skip, limit).await
+    }
+
+    pub async fn get(&self, id: &str) -> Option<Contact> {
+        let id_type = IdType::String(id.to_string());
+        self.repository.get(&id_type).await
     }
 
     pub async fn create_contact(

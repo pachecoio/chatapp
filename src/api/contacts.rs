@@ -10,6 +10,7 @@ use serde::Deserialize;
 pub fn get_scope() -> actix_web::Scope {
     web::scope("/contacts")
         .service(get_contacts)
+        .service(get_contact)
         .service(create_contact)
 }
 
@@ -40,9 +41,18 @@ pub async fn get_contacts(data: web::Data<AppState>, query: web::Query<GetContac
     Ok(HttpResponse::Ok().json(response_data))
 }
 
-#[get("/{id}")]
-pub async fn get_contact(data: web::Data<AppState>) -> Result<HttpResponse, Error> {
-    todo!()
+#[get("/{contact_id}")]
+pub async fn get_contact(data: web::Data<AppState>, path: web::Path<String>) -> Result<HttpResponse, Error> {
+    let contact_id = path.into_inner();
+    let db = &data.db;
+    let mut repo = get_repository(db);
+    let service = ContactService::new(&mut repo);
+    match service.get(&contact_id).await {
+        Some(contact) => Ok(HttpResponse::Ok().json(contact)),
+        None => Ok(HttpResponse::NotFound().json(json!({
+            "message": format!("Contact with id {} not found", contact_id)
+        }))),
+    }
 }
 
 #[post("")]
