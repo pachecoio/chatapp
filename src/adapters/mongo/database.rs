@@ -2,7 +2,8 @@ use mongodb::options::ClientOptions;
 use mongodb::Database;
 
 pub async fn init(db_name: &str) -> Database {
-    let mut options = ClientOptions::parse("mongodb://localhost:27017")
+    let MONGO_URL = std::env::var("MONGO_URL").unwrap_or("mongodb://localhost:27017".to_string());
+    let mut options = ClientOptions::parse(&MONGO_URL)
         .await
         .unwrap();
     options.app_name = Some(db_name.to_string());

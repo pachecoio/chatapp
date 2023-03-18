@@ -162,7 +162,7 @@ mod tests {
         };
         let res = service.send_message(&cmd).await;
 
-        let channels = service.channel_repository.list().await.unwrap();
+        let (total, channels) = service.channel_repository.list(None, None).await.unwrap();
         assert_eq!(channels.len(), 1, "Should not have created a new channel");
         assert!(res.is_ok());
 

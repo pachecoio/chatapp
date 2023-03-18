@@ -211,7 +211,7 @@ mod tests_mongo {
         let mut channel = res.unwrap();
         assert_eq!(channel.contact_ids.len(), 2);
 
-        let channels = service.repository.list().await.unwrap();
+        let (total, channels) = service.repository.list(None, None).await.unwrap();
         assert!(!channels.is_empty());
 
         channel.name = Some("Updated channel".to_string());

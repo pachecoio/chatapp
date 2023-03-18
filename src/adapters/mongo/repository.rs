@@ -85,15 +85,20 @@ where
         }
     }
 
-    async fn list(&self) -> Result<Vec<M>, RepositoryError> {
-        let mut cursor = self.collection.find(None, None).await.unwrap();
+    async fn list(&self, skip: Option<u64>, limit: Option<i32>) -> Result<(i32, Vec<M>), RepositoryError> {
+        let options = mongodb::options::FindOptions::builder()
+            .skip(skip.unwrap_or(0))
+            .limit(limit.unwrap_or(100) as i64)
+            .build();
+        let mut cursor = self.collection.find(None, options).await.unwrap();
+        let count = self.collection.count_documents(None, None).await.unwrap();
         let mut models = Vec::new();
 
         while let Some(result) = cursor.try_next().await.unwrap() {
             models.push(result);
         }
 
-        Ok(models)
+        Ok((count as i32, models))
     }
 }
 
