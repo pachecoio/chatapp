@@ -85,7 +85,7 @@ mod tests {
         let mut repo = mock_contact_repo();
         let mut service = ContactService::new(&mut repo);
         let _res = _create_contact(&mut service).await;
-        let (total, contacts) = service.repository.list(None, None).await.unwrap();
+        let (_total, contacts) = service.repository.list(None, None).await.unwrap();
         assert_eq!(contacts.len(), 1);
     }
 
@@ -94,7 +94,7 @@ mod tests {
         let mut repo = mock_contact_repo();
         let mut service = ContactService::new(&mut repo);
         let _res = _create_contact(&mut service).await;
-        let (total, contacts) = service.repository.list(None, None).await.unwrap();
+        let (_total, contacts) = service.repository.list(None, None).await.unwrap();
         let id = contacts.first().unwrap().id();
 
         let contact = service.repository.get(&id).await;
@@ -118,12 +118,12 @@ mod tests {
         let mut repo = mock_contact_repo();
         let mut service = ContactService::new(&mut repo);
         let _res = _create_contact(&mut service).await;
-        let (total, contacts) = service.repository.list(None, None).await.unwrap();
+        let (_total, contacts) = service.repository.list(None, None).await.unwrap();
         let id = contacts.first().unwrap().id();
 
         let res = service.repository.delete(&id).await;
         assert!(res.is_ok());
-        let (total, contacts) = service.repository.list(None, None).await.unwrap();
+        let (_total, contacts) = service.repository.list(None, None).await.unwrap();
         assert_eq!(contacts.len(), 0);
     }
 }
@@ -152,7 +152,7 @@ mod tests_mongo {
         let res_err = service.create_contact(&cmd).await;
         assert!(res_err.is_err());
 
-        let (total, contacts) = service.repository.list(None, None).await.unwrap();
+        let (_total, contacts) = service.repository.list(None, None).await.unwrap();
         assert!(!contacts.is_empty());
 
         let id = res.unwrap().id();

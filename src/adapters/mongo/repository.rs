@@ -67,13 +67,13 @@ where
     async fn get(&self, _id: &IdType) -> Option<M> {
         let object_id = match _id {
             IdType::String(s) => {
-                let object_id = match mongodb::bson::oid::ObjectId::parse_str(s) {
+                
+                match mongodb::bson::oid::ObjectId::parse_str(s) {
                     Ok(o) => o,
                     Err(_) => return None,
-                };
-                object_id
+                }
             }
-            IdType::ObjectId(o) => o.clone(),
+            IdType::ObjectId(o) => *o,
         };
 
         self.collection
@@ -106,12 +106,12 @@ where
 #[async_trait]
 impl ContactRepository for MongoRepository<Contact> {
     async fn find_by_email(&self, email: &str) -> Option<Contact> {
-        let result = self
+        
+        self
             .collection
             .find_one(Some(doc! { "email": email }), None)
             .await
-            .unwrap();
-        result
+            .unwrap()
     }
 }
 
