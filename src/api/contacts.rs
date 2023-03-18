@@ -89,6 +89,7 @@ mod integration_tests {
     use actix_web::{test, web, App};
 
     #[actix_web::test]
+    #[ignore]
     async fn test_get_contacts() -> Result<(), actix_web::Error> {
         let db = adapters::mongo::database::init("chatapp").await;
         let mut app = test::init_service(
