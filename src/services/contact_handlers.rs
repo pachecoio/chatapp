@@ -12,7 +12,11 @@ impl<'a> ContactService<'a> {
         ContactService { repository: repo }
     }
 
-    pub async fn list(&self, skip: Option<u64>, limit: Option<i32>) -> Result<(i32, Vec<Contact>), RepositoryError> {
+    pub async fn list(
+        &self,
+        skip: Option<u64>,
+        limit: Option<i32>,
+    ) -> Result<(i32, Vec<Contact>), RepositoryError> {
         self.repository.list(skip, limit).await
     }
 

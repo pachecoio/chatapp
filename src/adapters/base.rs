@@ -30,7 +30,11 @@ pub trait Repository<M: Model> {
     async fn update(&mut self, entity: &M) -> Result<(), RepositoryError>;
     async fn delete(&mut self, id: &IdType) -> Result<(), RepositoryError>;
     async fn get(&self, id: &IdType) -> Option<M>;
-    async fn list(&self, skip: Option<u64>, limit: Option<i32>) -> Result<(i32, Vec<M>), RepositoryError>;
+    async fn list(
+        &self,
+        skip: Option<u64>,
+        limit: Option<i32>,
+    ) -> Result<(i32, Vec<M>), RepositoryError>;
 }
 
 #[derive(Debug, Serialize, Deserialize)]

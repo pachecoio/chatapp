@@ -82,7 +82,11 @@ where
             .unwrap()
     }
 
-    async fn list(&self, skip: Option<u64>, limit: Option<i32>) -> Result<(i32, Vec<M>), RepositoryError> {
+    async fn list(
+        &self,
+        skip: Option<u64>,
+        limit: Option<i32>,
+    ) -> Result<(i32, Vec<M>), RepositoryError> {
         let options = mongodb::options::FindOptions::builder()
             .skip(skip.unwrap_or(0))
             .limit(limit.unwrap_or(100) as i64)

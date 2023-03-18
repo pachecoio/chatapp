@@ -61,7 +61,11 @@ impl<M: Model> Repository<M> for InMemoryRepository<M> {
         }
         None
     }
-    async fn list(&self, skip: Option<i32>, limit: Option<i32>) -> Result<(i32, Vec<M>), RepositoryError> {
+    async fn list(
+        &self,
+        skip: Option<u64>,
+        limit: Option<i32>,
+    ) -> Result<(i32, Vec<M>), RepositoryError> {
         Ok((self.entities.len() as i32, self.entities.clone()))
     }
 }
