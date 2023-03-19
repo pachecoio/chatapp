@@ -15,6 +15,7 @@ pub struct CreateContact {
     pub email: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateContact {
     pub id: IdType,
     pub name: Option<String>,

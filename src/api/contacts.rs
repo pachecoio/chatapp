@@ -1,23 +1,31 @@
 use crate::adapters::mongo::repository::MongoRepository;
-use crate::commands::CreateContact;
+use crate::commands::{CreateContact, UpdateContact};
 use crate::models::Contact;
 use crate::services::ContactService;
 use crate::AppState;
-use actix_web::{get, post, web, Error, HttpResponse};
+use actix_web::{get, post, web, Error, HttpResponse, put};
 use serde::Deserialize;
 use serde_json::json;
+use crate::adapters::IdType;
 
 pub fn get_scope() -> actix_web::Scope {
     web::scope("/contacts")
         .service(get_contacts)
         .service(get_contact)
         .service(create_contact)
+        .service(update_contact)
 }
 
 #[derive(Deserialize)]
 pub struct GetContactsQuery {
     page: Option<i32>,
     per_page: Option<i32>,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateContactBody {
+    name: Option<String>,
+    email: Option<String>,
 }
 
 #[get("")]
@@ -71,6 +79,30 @@ pub async fn create_contact(
     let mut service = ContactService::new(&mut repo);
     let res = service.create_contact(&contact).await;
     match res {
+        Ok(contact) => Ok(HttpResponse::Ok().json(contact)),
+        Err(e) => Ok(HttpResponse::BadRequest()
+            .content_type("application/json")
+            .json(e)),
+    }
+}
+
+#[put("/{contact_id}")]
+pub async fn update_contact(
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+    contact: web::Json<UpdateContactBody>,
+) -> Result<HttpResponse, Error> {
+    let contact_id = path.into_inner();
+    let db = &data.db;
+    let mut repo = get_repository(db);
+    let mut service = ContactService::new(&mut repo);
+
+    let cmd = UpdateContact {
+        id: IdType::String(contact_id),
+        name: contact.name.clone(),
+        email: contact.email.clone(),
+    };
+    match service.update_contact(&cmd).await {
         Ok(contact) => Ok(HttpResponse::Ok().json(contact)),
         Err(e) => Ok(HttpResponse::BadRequest()
             .content_type("application/json")

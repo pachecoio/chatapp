@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Contact {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    id: Option<ObjectId>,
+    pub(crate) id: Option<ObjectId>,
     pub name: String,
     pub email: String,
     #[serde(with = "ts_seconds")]

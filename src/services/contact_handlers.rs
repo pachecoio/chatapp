@@ -42,7 +42,7 @@ impl<'a> ContactService<'a> {
         Ok(contact)
     }
 
-    async fn update_contact(
+    pub(crate) async fn update_contact(
         &mut self,
         cmd: &commands::UpdateContact,
     ) -> Result<Contact, RepositoryError> {
@@ -58,8 +58,17 @@ impl<'a> ContactService<'a> {
             contact.name = name.clone();
         }
         if let Some(email) = &cmd.email {
-            contact.email = email.clone();
+            if let Some(c) = self.repository.find_by_email(email).await {
+                if c.id != contact.id {
+                    return Err(RepositoryError {
+                        message: format!("Contact with email {} already exists", email),
+                    });
+                }
+            } else {
+                contact.email = email.clone();
+            }
         }
+
         self.repository.update(&contact).await?;
         Ok(contact)
     }
