@@ -3,7 +3,7 @@ use crate::commands::{CreateContact, UpdateContact};
 use crate::models::Contact;
 use crate::services::ContactService;
 use crate::AppState;
-use actix_web::{get, post, web, Error, HttpResponse, put};
+use actix_web::{get, post, web, Error, HttpResponse, put, delete};
 use serde::Deserialize;
 use serde_json::json;
 use crate::adapters::IdType;
@@ -14,6 +14,7 @@ pub fn get_scope() -> actix_web::Scope {
         .service(get_contact)
         .service(create_contact)
         .service(update_contact)
+        .service(delete_contact)
 }
 
 #[derive(Deserialize)]
@@ -104,6 +105,23 @@ pub async fn update_contact(
     };
     match service.update_contact(&cmd).await {
         Ok(contact) => Ok(HttpResponse::Ok().json(contact)),
+        Err(e) => Ok(HttpResponse::BadRequest()
+            .content_type("application/json")
+            .json(e)),
+    }
+}
+
+#[delete("/{contact_id}")]
+pub async fn delete_contact(
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+) -> Result<HttpResponse, Error> {
+    let contact_id = path.into_inner();
+    let db = &data.db;
+    let mut repo = get_repository(db);
+    let mut service = ContactService::new(&mut repo);
+    match service.delete_contact(&contact_id).await {
+        Ok(_) => Ok(HttpResponse::NoContent().finish()),
         Err(e) => Ok(HttpResponse::BadRequest()
             .content_type("application/json")
             .json(e)),

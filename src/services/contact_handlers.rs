@@ -42,7 +42,7 @@ impl<'a> ContactService<'a> {
         Ok(contact)
     }
 
-    pub(crate) async fn update_contact(
+    pub async fn update_contact(
         &mut self,
         cmd: &commands::UpdateContact,
     ) -> Result<Contact, RepositoryError> {
@@ -71,6 +71,11 @@ impl<'a> ContactService<'a> {
 
         self.repository.update(&contact).await?;
         Ok(contact)
+    }
+
+    pub async fn delete_contact(&mut self, id: &str) -> Result<(), RepositoryError> {
+        let id_type = IdType::String(id.to_string());
+        self.repository.delete(&id_type).await
     }
 }
 

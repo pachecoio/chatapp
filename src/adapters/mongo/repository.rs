@@ -51,10 +51,19 @@ where
     }
 
     async fn delete(&mut self, id: &IdType) -> Result<(), RepositoryError> {
-        let doc = match id {
-            IdType::String(s) => doc! { "id": s },
-            IdType::ObjectId(o) => doc! { "_id": o },
+        let object_id = match id {
+            IdType::String(s) => {
+                match mongodb::bson::oid::ObjectId::parse_str(s) {
+                    Ok(o) => o,
+                    Err(_) => return Err(RepositoryError {
+                        message: "Invalid id".to_string(),
+                    }),
+                }
+            }
+            IdType::ObjectId(o) => *o,
         };
+        let doc = doc! { "_id": object_id };
+
         let result = self.collection.delete_one(doc, None).await;
         match result {
             Ok(_) => Ok(()),
